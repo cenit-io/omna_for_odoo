@@ -56,14 +56,10 @@ class Omna(http.Controller):
 
     @http.route('/omna/integrations/authorize/<string:integration_id>', type='http', auth='user', methods=['GET'])
     def authorize_integration(self, integration_id, **kw):
-        request.env.user.context_omna_get_access_token_code = None
-        integration = request.env['omna.integration'].search(['integration_id', '=', integration_id], limit=1)
+        integration = request.env['omna.integration'].search([('integration_id', '=', integration_id)], limit=1)
         if integration:
             integration.write({'authorized': True})
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'reload',
-                'params': {'menu_id': self.env.ref('omna.menu_omna_integration').id},
-            }
+            redirect = '/web#action=%s&model=omna.integration&view_type=kanban&menu_id=%s' % (request.env.ref('omna.action_omna_integration').id, request.env.ref('omna.menu_omna_my_integrations').id)
+            return http.redirect_with_hash(redirect)
         else:
-            raise exceptions.AccessError("Invalid integration id.")
+            raise exceptions.AccessError(_("Invalid integration id."))

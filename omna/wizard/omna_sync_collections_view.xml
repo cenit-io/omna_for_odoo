@@ -6,14 +6,14 @@
             <field name="name">omna.sync.collections.wizard.form</field>
             <field name="model">omna.sync_collections_wizard</field>
             <field name="arch" type="xml">
-                <form string="Sync Collections">
+                <form string="Import Collections">
                     <group>
                         <div>
-                            Wizard to synchronize collections from OMNA.
+                            Wizard to import collections from OMNA.
                         </div>
                     </group>
                     <footer>
-                        <button string='Sync Collections' name="sync_collections" type="object" class="btn-primary"/>
+                        <button string='Import Collections' name="sync_collections" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>
@@ -21,14 +21,14 @@
         </record>
 
         <record id="action_sync_collections_wizard" model="ir.actions.act_window">
-            <field name="name">Sync Collections</field>
+            <field name="name">Import Collections</field>
             <field name="res_model">omna.sync_collections_wizard</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_sync_collections_wizard"/>
             <field name="target">new</field>
         </record>
 
-        <menuitem id="menu_omna_sync_collections" name="Sync Collections"
+        <menuitem id="menu_omna_sync_collections" name="Import Collections"
                   parent="menu_omna_settings_alt" sequence="0"
                   action="action_sync_collections_wizard"/>
 

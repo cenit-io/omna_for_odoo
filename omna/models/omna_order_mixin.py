@@ -53,11 +53,16 @@ class OmnaOrderMixin(models.AbstractModel):
                                                                      limit=1)
                         if act_orderline:
                             data = {
-                                'price_unit': line_item.get('price'),
+                                'price_unit': line_item.get('price') if product else None,
                                 'product_id': product.id if product else None,
+                                'name': product.product_tmpl_id.name if product else line_item.get('name'),
                                 'product_uom': product.product_tmpl_id.uom_id.id if product else None,
-                                'product_uom_qty': line_item.get('quantity')
+                                'product_uom_qty': line_item.get('quantity') if product else None
                             }
+
+                            if not product.id:
+                                data['display_type'] = 'line_section'
+
                             act_orderline.write(data)
                         else:
                             self._create_orderline(act_order, line_item, order.get('payments')[0].get('currency'))
@@ -141,11 +146,12 @@ class OmnaOrderMixin(models.AbstractModel):
             'price_unit': line_item.get('price'),
             'state': omna_order.state,
             'product_id': product.id if product else None,
-            'product_uom': product.product_tmpl_id.uom_id.id if product else None,
+            'product_uom': product.product_tmpl_id.uom_id.id if product else self.env.ref('uom.product_uom_unit').id,
             'product_uom_qty': line_item.get('quantity'),
             'customer_lead': 0,  #
-            'currency_id': currency.id,
-            'display_type': False if product else 'line_section'
+            'currency_id': currency.id
         }
+        if not product.id:
+            data['display_type'] = 'line_section'
 
         self.env['sale.order.line'].create(data)

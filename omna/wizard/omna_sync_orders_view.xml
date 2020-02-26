@@ -6,14 +6,14 @@
             <field name="name">omna.sync.orders.wizard.form</field>
             <field name="model">omna.sync_orders_wizard</field>
             <field name="arch" type="xml">
-                <form string="Sync Orders">
+                <form string="Import Orders">
                     <group>
                         <div>
-                            Wizard to synchronize orders from OMNA.
+                            Wizard to import orders from OMNA.
                         </div>
                     </group>
                     <footer>
-                        <button string='Sync orders' name="sync_orders" type="object" class="btn-primary"/>
+                        <button string='Import orders' name="sync_orders" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>
@@ -21,14 +21,14 @@
         </record>
 
         <record id="action_sync_orders_wizard" model="ir.actions.act_window">
-            <field name="name">Sync Orders</field>
+            <field name="name">Import Orders</field>
             <field name="res_model">omna.sync_orders_wizard</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_sync_orders_wizard"/>
             <field name="target">new</field>
         </record>
 
-        <menuitem id="menu_omna_sync_orders" name="Sync Orders"
+        <menuitem id="menu_omna_sync_orders" name="Import Orders"
                   parent="menu_omna_settings_alt" sequence="0"
                   action="action_sync_orders_wizard"/>
 

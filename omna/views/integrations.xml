@@ -80,20 +80,20 @@
                                         <t t-if="record.authorized.raw_value == true">
                                             <button type="object" name="unauthorize"
                                                     class="btn btn-basic" string="Unauthorize">
-                                                <span style="font-size: 1.5rem" class="fa fa-times-circle text-danger"
+                                                <span style="font-size: 1.5rem" title="Unauthorize" aria-label="Unauthorize" class="fa fa-times-circle text-danger"
                                                       role="img"></span>
                                             </button>
                                         </t>
                                         <t t-else="">
                                             <button type="object" name="authorize"
                                                class="btn btn-basic text-success" string="Authorize">
-                                                <span style="font-size: 1.5rem" class="fa fa-check-circle"
+                                                <span style="font-size: 1.5rem" title="Authorize" aria-label="Authorize" class="fa fa-check-circle"
                                                       role="img"></span>
                                             </button>
                                         </t>
                                         <button type="object" name="unlink" class="btn btn-basic text-danger"
                                                 string="Delete">
-                                            <span style="font-size: 1.5rem" class="fa fa-trash" role="img"></span>
+                                            <span style="font-size: 1.5rem" title="Delete" aria-label="Delete" class="fa fa-trash" role="img"></span>
                                         </button>
                                     </div>
                                 </div>

@@ -28,6 +28,11 @@ class OmnaSyncOrders(models.TransientModel):
 
             self.env['omna.order.mixin'].sync_orders(orders)
 
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'reload'
+            }
+
         except Exception as e:
             _logger.error(e)
             raise exceptions.AccessError(e)

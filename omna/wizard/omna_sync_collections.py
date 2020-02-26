@@ -35,7 +35,7 @@ class OmnaSyncCollections(models.TransientModel):
 
             collection_obj = self.env['omna.collection']
             for collection in collections:
-                act_collection = collection_obj.search([('omna_id', '=', collection.get('id'))])
+                act_collection = collection_obj.search([('omna_id', '=', collection.get('id')), ('omna_tenant_id', '=', self.env.user.context_omna_current_tenant.id)])
                 if act_collection:
                     data = {
                         'name': collection.get('name'),
@@ -43,10 +43,10 @@ class OmnaSyncCollections(models.TransientModel):
                         'shared_version': collection.get('shared_version'),
                         'summary': collection.get('channel'),
                         'state': collection.get('status'),
-                        'updated_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('updated_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('updated_at') else '',
-                        'installed_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('installed_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('installed_at') else ''
+                        'updated_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('updated_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('updated_at') else None,
+                        'installed_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('installed_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('installed_at') else None
                     }
-                    act_collection.sudo().with_context(synchronizing=True).write(data)
+                    act_collection.with_context(synchronizing=True).write(data)
                 else:
                     data = {
                         'name': collection.get('name'),
@@ -55,14 +55,13 @@ class OmnaSyncCollections(models.TransientModel):
                         'shared_version': collection.get('shared_version'),
                         'summary': collection.get('channel'),
                         'state': collection.get('status'),
-                        'updated_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('updated_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('updated_at') else '',
-                        'installed_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('installed_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('installed_at') else ''
+                        'updated_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('updated_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('updated_at') else None,
+                        'installed_at': fields.Datetime.to_string(dateutil.parser.parse(collection.get('installed_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if collection.get('installed_at') else None
                     }
-                    act_collection = collection_obj.sudo().with_context(synchronizing=True).create(data)
+                    act_collection = collection_obj.with_context(synchronizing=True).create(data)
             return {
                 'type': 'ir.actions.client',
-                'tag': 'reload',
-                'params': {'menu_id': self.env.ref('omna.menu_omna_collections').id},
+                'tag': 'reload'
             }
         except Exception as e:
             _logger.error(e)

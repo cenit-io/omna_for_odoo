@@ -34,7 +34,7 @@ class OmnaSyncIntegrations(models.TransientModel):
 
             integration_obj = self.env['omna.integration']
             for integration in integrations:
-                act_integration = integration_obj.search([('integration_id', '=', integration.get('id'))])
+                act_integration = integration_obj.search([('integration_id', '=', integration.get('id')), ('omna_tenant_id', '=', self.env.user.context_omna_current_tenant.id)])
                 if act_integration:
                     data = {
                         'name': integration.get('name'),
@@ -52,8 +52,7 @@ class OmnaSyncIntegrations(models.TransientModel):
                     act_integration = integration_obj.with_context(synchronizing=True).create(data)
             return {
                 'type': 'ir.actions.client',
-                'tag': 'reload',
-                'params': {'menu_id': self.env.ref('omna.menu_omna_integration').id},
+                'tag': 'reload'
             }
         except Exception as e:
             _logger.error(e)

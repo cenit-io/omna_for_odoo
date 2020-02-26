@@ -56,7 +56,11 @@ class OmnaSyncTenants(models.TransientModel):
                             dateutil.parser.parse(tenant.get('deactivation'), tzinfos=tzinfos).astimezone(pytz.utc)),
                     }
                     act_tenant = self.env['omna.tenant'].with_context(synchronizing=True).create(data)
-            return True
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'reload'
+            }
         except Exception as e:
             _logger.error(e)
             raise exceptions.AccessError(e)

@@ -56,6 +56,12 @@ class OmnaSyncWorkflows(models.TransientModel):
                     act_flow.with_context(synchronizing=True).write(flow_data)
                 else:
                     act_flow = self.env['omna.flow'].with_context(synchronizing=True).create(flow_data)
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'reload'
+            }
+
         except Exception as e:
             _logger.error(e)
             raise exceptions.AccessError(e)

@@ -20,7 +20,7 @@
             <field name="arch" type="xml">
                 <form string="Collection">
                     <header>
-                        <button name="install_collection" string="Install Collection" states="outdated" type="object"
+                        <button name="install_collection" string="Install Collection" states="outdated,not_installed" type="object"
                                 class="oe_highlight"/>
                         <button name="uninstall_collection" string="Uninstall Collection" states="installed" type="object"
                                 class="oe_highlight"/>
@@ -54,7 +54,7 @@
             <field name="name">Collections</field>
             <field name="res_model">omna.collection</field>
             <field name="view_mode">tree,form</field>
-            <field name="context">{}</field>
+            <field name="context">{'search_default_current_tenant': 1}</field>
         </record>
 
         <menuitem id="menu_omna_collections" name="Collections" parent="menu_omna_system" sequence="0"

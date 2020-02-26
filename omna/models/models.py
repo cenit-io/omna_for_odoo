@@ -2,7 +2,7 @@
 
 import odoo
 import datetime
-from odoo import models, fields, api, exceptions
+from odoo import models, fields, api, exceptions, tools
 from odoo.exceptions import UserError
 from odoo.tools.image import image_data_uri
 import dateutil.parser
@@ -138,7 +138,7 @@ class OmnaWebhook(models.Model):
                 vals_list['omna_webhook_id'] = response.get('data').get('id')
                 return super(OmnaWebhook, self).create(vals_list)
             else:
-                raise exceptions.AccessError("Error trying to push webhook to Omna's API.")
+                raise exceptions.AccessError(_("Error trying to push webhook to Omna's API."))
         else:
             return super(OmnaWebhook, self).create(vals_list)
 
@@ -159,7 +159,7 @@ class OmnaWebhook(models.Model):
                 vals['omna_webhook_id'] = response.get('data').get('id')
                 return super(OmnaWebhook, self).write(vals)
             else:
-                raise exceptions.AccessError("Error trying to update webhook in Omna's API.")
+                raise exceptions.AccessError(_("Error trying to update webhook in Omna's API."))
         else:
             return super(OmnaWebhook, self).write(vals)
 
@@ -210,6 +210,16 @@ class OmnaFlow(models.Model):
     omna_id = fields.Char('OMNA Workflow ID', index=True)
     active = fields.Boolean('Active', default=True, readonly=True)
 
+    def start(self):
+        for flow in self:
+            self.get('flows/%s/start' % flow.omna_id, {})
+        return {'type': 'ir.actions.act_window_close'}
+
+    def toggle_status(self):
+        for flow in self:
+            self.get('flows/%s/toggle/scheduler/status' % flow.omna_id, {})
+        return {'type': 'ir.actions.act_window_close'}
+
     @api.model
     def create(self, vals):
         if not self._context.get('synchronizing'):
@@ -254,7 +264,7 @@ class OmnaFlow(models.Model):
                 vals['omna_id'] = response.get('data').get('id')
                 return super(OmnaFlow, self).create(vals)
             else:
-                raise exceptions.AccessError("Error trying to push the workflow to Omna.")
+                raise exceptions.AccessError(_("Error trying to push the workflow to Omna."))
         else:
             return super(OmnaFlow, self).create(vals)
 
@@ -305,7 +315,7 @@ class OmnaFlow(models.Model):
             if 'id' in response.get('data'):
                 return super(OmnaFlow, self).write(vals)
             else:
-                raise exceptions.AccessError("Error trying to update the workflow in Omna.")
+                raise exceptions.AccessError(_("Error trying to update the workflow in Omna."))
         else:
             return super(OmnaFlow, self).write(vals)
 
@@ -358,7 +368,7 @@ class ProductTemplate(models.Model):
                 vals_list['omna_product_id'] = response.get('data').get('id')
                 return super(ProductTemplate, self).create(vals_list)
             else:
-                raise exceptions.AccessError("Error trying to push product to Omna's API.")
+                raise exceptions.AccessError(_("Error trying to push product to Omna's API."))
         else:
             return super(ProductTemplate, self).create(vals_list)
 
@@ -379,7 +389,7 @@ class ProductTemplate(models.Model):
                     vals['omna_product_id'] = response.get('data').get('id')
                     return super(ProductTemplate, self).write(vals)
                 else:
-                    raise exceptions.AccessError("Error trying to update product in Omna's API.")
+                    raise exceptions.AccessError(_("Error trying to update product in Omna's API."))
             else:
                 return super(ProductTemplate, self).write(vals)
         else:
@@ -447,7 +457,7 @@ class ProductProduct(models.Model):
                     vals['omna_variant_id'] = response.get('data').get('id')
                     return super(ProductProduct, self).write(vals)
                 else:
-                    raise exceptions.AccessError("Error trying to update product variant in Omna's API.")
+                    raise exceptions.AccessError(_("Error trying to update product variant in Omna's API."))
             else:
                 return super(ProductProduct, self).write(vals)
         else:
@@ -481,7 +491,7 @@ class SaleOrder(models.Model):
         else:
             return None
 
-    omna_tenant_id = fields.Many2one('omna.tenant', 'Tenant', required=True, default=_current_tenant)
+    omna_tenant_id = fields.Many2one('omna.tenant', 'Tenant', default=_current_tenant)
     omna_id = fields.Char("OMNA Order ID", index=True)
     integration_id = fields.Many2one('omna.integration', 'OMNA Integration')
 
@@ -545,10 +555,10 @@ class OmnaTask(models.Model):
                 'progress': float(data.get('progress')),
                 'task_created_at': fields.Datetime.to_string(
                     dateutil.parser.parse(data.get('created_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if data.get(
-                    'created_at') else '',
+                    'created_at') else None,
                 'task_updated_at': fields.Datetime.to_string(
                     dateutil.parser.parse(data.get('updated_at'), tzinfos=tzinfos).astimezone(pytz.utc)) if data.get(
-                    'updated_at') else '',
+                    'updated_at') else None,
                 'task_execution_ids': [],
                 'task_notification_ids': []
             }
@@ -557,10 +567,10 @@ class OmnaTask(models.Model):
                     'status': execution.get('status'),
                     'exec_started_at': fields.Datetime.to_string(
                         dateutil.parser.parse(execution.get('started_at'), tzinfos=tzinfos).astimezone(
-                            pytz.utc)) if execution.get('started_at') else '',
+                            pytz.utc)) if execution.get('started_at') else None,
                     'exec_completed_at': fields.Datetime.to_string(
                         dateutil.parser.parse(execution.get('completed_at'), tzinfos=tzinfos).astimezone(
-                            pytz.utc)) if execution.get('completed_at') else '',
+                            pytz.utc)) if execution.get('completed_at') else None,
                 }))
             for notification in data.get('notifications', []):
                 res['task_notification_ids'].append((0, 0, {
@@ -658,77 +668,6 @@ class OmnaTaskNotification(models.Model):
     task_id = fields.Many2one('omna.task', string='Task')
 
 
-class OmnaTenant(models.Model):
-    _name = 'omna.tenant'
-    _inherit = 'omna.api'
-
-    name = fields.Char('Name', required=True)
-    omna_tenant_id = fields.Char('Tenant identifier in OMNA', index=True, readonly=True)
-    token = fields.Char('Token', required=True, readonly=True)
-    secret = fields.Char('Secret', required=True, readonly=True)
-    is_ready_to_omna = fields.Boolean('Is ready to OMNA', readonly=True)
-    deactivation = fields.Datetime('Deactivation', readonly=True)
-
-    def _compute_current(self):
-        for record in self:
-            record.current = self.env.user.context_omna_current_tenant.id == record.id
-
-    current = fields.Boolean('Current Tenant', default=False, invisible=True, compute=_compute_current)
-
-    @api.model
-    def create(self, vals_list):
-        if not self._context.get('synchronizing'):
-            data = {
-                'name': vals_list['name']
-            }
-            response = self.post('tenants', {'data': data})
-            tzinfos = {
-                'PST': -8 * 3600,
-                'PDT': -7 * 3600,
-            }
-            if response.get('data').get('id'):
-                vals_list['omna_tenant_id'] = response.get('data').get('id')
-                vals_list['token'] = response.get('data').get('token')
-                vals_list['secret'] = response.get('data').get('secret')
-                vals_list['is_ready_to_omna'] = response.get('data').get('is_ready_to_omna')
-                vals_list['deactivation'] = odoo.fields.Datetime.to_string(
-                    dateutil.parser.parse(response.get('data').get('deactivation'), tzinfos=tzinfos).astimezone(
-                        pytz.utc))
-                return super(OmnaTenant, self).create(vals_list)
-            else:
-                raise exceptions.AccessError("Error trying to push tenant to Omna's API.")
-        else:
-            return super(OmnaTenant, self).create(vals_list)
-
-    def unlink(self):
-        self.check_access_rights('unlink')
-        self.check_access_rule('unlink')
-        for rec in self:
-            response = rec.delete('tenants/%s' % rec.omna_tenant_id)
-        return super(OmnaTenant, self).unlink()
-
-    @api.model
-    def _switch(self):
-        self.ensure_one()
-        self.env.user.context_omna_current_tenant = self.id
-        return True
-
-    def switch(self):
-        self._switch()
-        return {
-            'type': 'ir.actions.client',
-            'tag': 'reload'
-        }
-
-    @api.model
-    def switch_action(self, id):
-        tenant = self.browse(id)
-        if tenant:
-            return tenant._switch()
-        else:
-            return False
-
-
 class OmnaCollection(models.Model):
     _name = 'omna.collection'
     _inherit = 'omna.api'
@@ -743,14 +682,14 @@ class OmnaCollection(models.Model):
             return None
 
     omna_tenant_id = fields.Many2one('omna.tenant', 'Tenant', required=True, default=_current_tenant)
-    name = fields.Char('Name', required=True)
-    title = fields.Char('Title', required=True)
-    omna_id = fields.Char('OMNA Collection id')
-    shared_version = fields.Char('Shared Version')
-    summary = fields.Text('Summary')
-    state = fields.Selection([('outdated', 'Outdated'), ('installed', 'Installed')], 'State')
-    updated_at = fields.Datetime('Updated At')
-    installed_at = fields.Datetime('Installed At')
+    name = fields.Char('Name', required=True, readonly=True)
+    title = fields.Char('Title', required=True, readonly=True)
+    omna_id = fields.Char('OMNA Collection id', readonly=True)
+    shared_version = fields.Char('Shared Version', readonly=True)
+    summary = fields.Text('Summary', readonly=True)
+    state = fields.Selection([('not_installed', 'Not Installed'), ('outdated', 'Outdated'), ('installed', 'Installed')], 'State', readonly=True)
+    updated_at = fields.Datetime('Updated At', readonly=True)
+    installed_at = fields.Datetime('Installed At', readonly=True)
 
     def install_collection(self):
         self.ensure_one()

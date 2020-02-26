@@ -8,4 +8,4 @@ access_omna_task,access_omna_task,model_omna_task,omna.group_omna_manager,1,0,0,
 access_omna_task_execution,access_omna_task_execution,model_omna_task_execution,omna.group_omna_manager,1,1,1,1
 access_omna_task_notification,access_omna_task_notification,model_omna_task_notification,omna.group_omna_manager,1,1,1,1
 access_omna_tenant,access_omna_tenant,model_omna_tenant,omna.group_omna_manager,1,1,1,1
-access_omna_collection,access_omna_collection,model_omna_collection,omna.group_omna_manager,1,0,0,1
+access_omna_collection,access_omna_collection,model_omna_collection,omna.group_omna_manager,1,1,1,1

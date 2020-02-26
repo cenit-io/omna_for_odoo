@@ -8,4 +8,5 @@ from . import omna_action_start_workflows
 from . import omna_action_status_workflows
 from . import omna_sync_tenants
 from . import omna_sync_collections
+from . import omna_publish_product
 

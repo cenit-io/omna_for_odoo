@@ -26,6 +26,7 @@ import logging
 import hmac
 import hashlib
 from datetime import datetime, timezone, time
+from odoo.tools.translate import _
 from odoo import models, api, exceptions
 
 _logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ class OmnaApi(models.AbstractModel):
             r = requests.get('%s/%s' % (config['omna_api_url'], path), payload)
         except Exception as e:
             _logger.error(e)
-            raise exceptions.AccessError("Error trying to connect to Omna's API.")
+            raise exceptions.AccessError(_("Error trying to connect to Omna's API."))
         if 200 <= r.status_code < 300:
             return r.json()
 
@@ -56,12 +57,12 @@ class OmnaApi(models.AbstractModel):
             _logger.error(error)
         except Exception as e:
             _logger.error(e)
-            raise exceptions.ValidationError("Omna's API returned with errors")
+            raise exceptions.ValidationError(_("Omna's API returned with errors"))
 
         if 400 <= error.get('code', 400) < 500:
-            raise exceptions.AccessError(error.get('message', "Error trying to connect to Omna's API."))
+            raise exceptions.AccessError(error.get('message', _("Error trying to connect to Omna's API.")))
 
-        raise exceptions.ValidationError(error.get('message', "Omna's API returned with errors"))
+        raise exceptions.ValidationError(error.get('message', _("Omna's API returned with errors")))
 
     @api.model
     def post(self, path, params={}):
@@ -72,7 +73,7 @@ class OmnaApi(models.AbstractModel):
             r = requests.post('%s/%s' % (config['omna_api_url'], path), json=payload, headers={'Content-Type': 'application/json'})
         except Exception as e:
             _logger.error(e)
-            raise exceptions.AccessError("Error trying to connect to Omna's API.")
+            raise exceptions.AccessError(_("Error trying to connect to Omna's API."))
         if 200 <= r.status_code < 300:
             return r.json()
 
@@ -81,12 +82,12 @@ class OmnaApi(models.AbstractModel):
             _logger.error(error)
         except Exception as e:
             _logger.error(e)
-            raise exceptions.ValidationError("Omna's API returned with errors")
+            raise exceptions.ValidationError(_("Omna's API returned with errors"))
 
         if 400 <= error.get('code', 400) < 500:
-            raise exceptions.AccessError(error.get('message', "Error trying to connect to Omna's API."))
+            raise exceptions.AccessError(error.get('message', _("Error trying to connect to Omna's API.")))
 
-        raise exceptions.ValidationError(error.get('message', "Omna's API returned with errors"))
+        raise exceptions.ValidationError(error.get('message', _("Omna's API returned with errors")))
 
     @api.model
     def patch(self, path, params={}):
@@ -97,7 +98,7 @@ class OmnaApi(models.AbstractModel):
             r = requests.patch('%s/%s' % (config['omna_api_url'], path), json=payload, headers={'Content-Type': 'application/json'})
         except Exception as e:
             _logger.error(e)
-            raise exceptions.AccessError("Error trying to connect to Omna's API.")
+            raise exceptions.AccessError(_("Error trying to connect to Omna's API."))
         if 200 <= r.status_code < 300:
             return r.json()
 
@@ -106,12 +107,37 @@ class OmnaApi(models.AbstractModel):
             _logger.error(error)
         except Exception as e:
             _logger.error(e)
-            raise exceptions.ValidationError("Omna's API returned with errors")
+            raise exceptions.ValidationError(_("Omna's API returned with errors"))
 
         if 400 <= error.get('code', 400) < 500:
-            raise exceptions.AccessError(error.get('message', "Error trying to connect to Omna's API."))
+            raise exceptions.AccessError(error.get('message', _("Error trying to connect to Omna's API.")))
 
-        raise exceptions.ValidationError(error.get('message', "Omna's API returned with errors"))
+        raise exceptions.ValidationError(error.get('message', _("Omna's API returned with errors")))
+
+    @api.model
+    def put(self, path, params={}):
+        payload = self._sign_request(path, params)
+        config = self.get_config()
+        try:
+            _logger.info("[PUT] %s ? %s", '%s/%s' % (config['omna_api_url'], path), payload)
+            r = requests.put('%s/%s' % (config['omna_api_url'], path), json=payload, headers={'Content-Type': 'application/json'})
+        except Exception as e:
+            _logger.error(e)
+            raise exceptions.AccessError(_("Error trying to connect to Omna's API."))
+        if 200 <= r.status_code < 300:
+            return r.json()
+
+        try:
+            error = r.json()
+            _logger.error(error)
+        except Exception as e:
+            _logger.error(e)
+            raise exceptions.ValidationError(_("Omna's API returned with errors"))
+
+        if 400 <= error.get('code', 400) < 500:
+            raise exceptions.AccessError(error.get('message', _("Error trying to connect to Omna's API.")))
+
+        raise exceptions.ValidationError(error.get('message', _("Omna's API returned with errors")))
 
     @api.model
     def delete(self, path, params={}):
@@ -122,7 +148,7 @@ class OmnaApi(models.AbstractModel):
             r = requests.delete('%s/%s' % (config['omna_api_url'], path), json=payload, headers={'Content-Type': 'application/json'})
         except Exception as e:
             _logger.error(e)
-            raise exceptions.AccessError("Error trying to connect to Omna's API.")
+            raise exceptions.AccessError(_("Error trying to connect to Omna's API."))
 
         if 200 <= r.status_code < 300:
             return True
@@ -132,17 +158,21 @@ class OmnaApi(models.AbstractModel):
             _logger.error(error)
         except Exception as e:
             _logger.error(e)
-            raise exceptions.ValidationError("Omna's API returned with errors")
+            raise exceptions.ValidationError(_("Omna's API returned with errors"))
 
         if 400 <= error.get('code', 400) < 500:
-            raise exceptions.AccessError(error.get('message', "Error trying to connect to Omna's API."))
+            raise exceptions.AccessError(error.get('message', _("Error trying to connect to Omna's API.")))
 
-        raise exceptions.ValidationError(error.get('message', "Omna's API returned with errors"))
+        raise exceptions.ValidationError(error.get('message', _("Omna's API returned with errors")))
 
     @api.model
     def _sign_request(self, path, params={}):
         payload = params.copy()
         config = self.get_config()
+
+        if not config['cenit_user_secret'] or not config['cenit_user_token']:
+            raise exceptions.AccessError(_("Please sign in with OMNA."))
+
         timestamp = datetime.now(timezone.utc)
         payload['token'] = config['cenit_user_token']
         payload['timestamp'] = int(datetime.timestamp(timestamp) * 1000)
