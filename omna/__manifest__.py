@@ -11,7 +11,7 @@
     'support': 'support@omna.io',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'sale_management'],
+    'depends': ['stock', 'sale_management', 'account'],
 
     # always loaded
     'data': [
