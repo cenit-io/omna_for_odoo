@@ -2,7 +2,7 @@
 
 import odoo
 import datetime
-from odoo import models, fields, api, exceptions, tools
+from odoo import models, fields, api, exceptions, tools, _
 from odoo.exceptions import UserError
 from odoo.tools.image import image_data_uri
 import dateutil.parser
@@ -213,12 +213,29 @@ class OmnaFlow(models.Model):
     def start(self):
         for flow in self:
             self.get('flows/%s/start' % flow.omna_id, {})
-        return {'type': 'ir.actions.act_window_close'}
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Workflow start'),
+                'message': _('The task to execute the workflow have been created, please go to \"System\\Tasks\" to check out the task status.'),
+                'sticky': True,
+            }
+        }
 
     def toggle_status(self):
         for flow in self:
             self.get('flows/%s/toggle/scheduler/status' % flow.omna_id, {})
-        return {'type': 'ir.actions.act_window_close'}
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Workflow toggle status'),
+                'message': _(
+                    'The workflow\'s status have been changed.'),
+                'sticky': True,
+            }
+        }
 
     @api.model
     def create(self, vals):
@@ -694,12 +711,29 @@ class OmnaCollection(models.Model):
     def install_collection(self):
         self.ensure_one()
         self.patch('collections/%s' % self.omna_id, {})
-        return True
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Install Collection'),
+                'message': _('The task to install the collection have been created, please go to \"System\\Tasks\" to check out the task status.'),
+                'sticky': True,
+            }
+        }
 
     def uninstall_collection(self):
         self.ensure_one()
         self.delete('collections/%s' % self.omna_id, {})
-        return True
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Uninstall Collection'),
+                'message': _(
+                    'The task to uninstall the collection have been created, please go to \"System\\Tasks\" to check out the task status.'),
+                'sticky': True,
+            }
+        }
 
 
 class OmnaIntegrationChannel(models.Model):
