@@ -6,16 +6,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 13.0+e-20191106\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-12 02:16+0000\n"
-"PO-Revision-Date: 2020-03-12 08:39-0500\n"
+"POT-Creation-Date: 2020-03-29 22:32+0000\n"
+"PO-Revision-Date: 2020-03-29 18:53-0500\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: \n"
+"Language: es\n"
 "X-Generator: Poedit 1.7.3\n"
-"Language: es_ES\n"
 
 #. module: omna
 #: model_terms:ir.ui.view,arch_db:omna.omna_kanban_view_integrations
@@ -192,9 +192,19 @@ msgid "Automatic Invoice"
 msgstr "Factura automática"
 
 #. module: omna
+#: model_terms:ir.ui.view,arch_db:omna.omna_collection_form_view model_terms:ir.ui.view,arch_db:omna.omna_collection_search_view model_terms:ir.ui.view,arch_db:omna.omna_collection_tree_view
+msgid "Available Integration"
+msgstr "Integración Disponible"
+
+#. module: omna
 #: model:ir.actions.act_window,name:omna.action_omna_integration_channel model:ir.ui.menu,name:omna.menu_omna_my_integration_channels model_terms:ir.ui.view,arch_db:omna.omna_integration_channel_tree_view
+msgid "Available Integration Channels"
+msgstr "Canales de Integración Disponibles"
+
+#. module: omna
+#: model:ir.actions.act_window,name:omna.action_omna_collection model:ir.ui.menu,name:omna.menu_omna_collections
 msgid "Available Integrations"
-msgstr "Integraciones Disponible"
+msgstr "Integraciones Disponibles"
 
 #. module: omna
 #. openerp-web
@@ -253,7 +263,7 @@ msgstr "Redondeo de efectivo"
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_settings__cenit_url
 msgid "Cenit URL"
-msgstr ""
+msgstr "Cenit URL"
 
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_integration__channel
@@ -269,17 +279,6 @@ msgstr "Código para obtener token de acceso a OMNA"
 #: model:ir.model.fields,field_description:omna.field_omna_settings__module_pad
 msgid "Collaborative Pads"
 msgstr "Pads colaborativos"
-
-#. module: omna
-#: model_terms:ir.ui.view,arch_db:omna.omna_collection_form_view
-msgid "Collection"
-msgstr "Colección"
-
-#. module: omna
-#: model:ir.actions.act_window,name:omna.action_omna_collection model:ir.ui.menu,name:omna.menu_omna_collections model_terms:ir.ui.view,arch_db:omna.omna_collection_search_view
-#: model_terms:ir.ui.view,arch_db:omna.omna_collection_tree_view
-msgid "Collections"
-msgstr "Colecciones"
 
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_settings__company_id
@@ -628,6 +627,12 @@ msgstr "Ocurrió un error mientras se intentaba conectar con OMNA API"
 #. module: omna
 #: code:addons/omna/models/models.py:0
 #, python-format
+msgid "Error trying to push integration to Omna's API."
+msgstr "Ocurrió un error mientras se intentaba enviar una integración a OMNA API"
+
+#. module: omna
+#: code:addons/omna/models/models.py:0
+#, python-format
 msgid "Error trying to push product to Omna's API."
 msgstr "Ocurrió un error mientras se intentaba enviar un producto a OMNA API"
 
@@ -789,13 +794,18 @@ msgid "Image 512"
 msgstr "Imagen 512"
 
 #. module: omna
+#: model_terms:ir.ui.view,arch_db:omna.view_sync_collections_wizard
+msgid "Import"
+msgstr "Importar"
+
+#. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_settings__module_account_bank_statement_import_qif
 msgid "Import .qif files"
 msgstr "Importar archivos .qif"
 
 #. module: omna
 #: model:ir.actions.act_window,name:omna.action_sync_collections_wizard model:ir.ui.menu,name:omna.menu_omna_sync_collections model_terms:ir.ui.view,arch_db:omna.view_sync_collections_wizard
-msgid "Import Collections"
+msgid "Import Available Integrations"
 msgstr "Importar Colecciones"
 
 #. module: omna
@@ -864,7 +874,12 @@ msgid "Info"
 msgstr "Infomación"
 
 #. module: omna
-#: code:addons/omna/models/models.py:0 model_terms:ir.ui.view,arch_db:omna.omna_collection_form_view
+#: model_terms:ir.ui.view,arch_db:omna.omna_collection_form_view
+msgid "Install"
+msgstr "Instalar"
+
+#. module: omna
+#: code:addons/omna/models/models.py:0
 #, python-format
 msgid "Install Collection"
 msgstr "Instalar Colección"
@@ -1023,7 +1038,7 @@ msgstr "Bloquear pedidos confirmados"
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_integration_channel__logo
 msgid "Logo src"
-msgstr ""
+msgstr "Logo src"
 
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_settings__group_stock_production_lot
@@ -1096,7 +1111,7 @@ msgstr ""
 #. module: omna
 #: model:ir.actions.act_window,name:omna.action_omna_integration model:ir.ui.menu,name:omna.menu_omna_my_integrations
 msgid "My Integrations"
-msgstr "Mis Integraciones"
+msgstr "Integraciones"
 
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_collection__name model:ir.model.fields,field_description:omna.field_omna_filters__name
@@ -1150,12 +1165,12 @@ msgstr ""
 #: code:addons/omna/static/src/xml/systray.xml:0
 #, python-format
 msgid "OMNA"
-msgstr ""
+msgstr "OMNA"
 
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_signin_settings__cenit_url
 msgid "OMNA API URL"
-msgstr ""
+msgstr "OMNA API URL"
 
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_collection__omna_id
@@ -1683,30 +1698,30 @@ msgstr ""
 #. module: omna
 #: model_terms:ir.ui.view,arch_db:omna.view_action_status_workflows_wizard
 msgid "The marked flows will activate or deactivate their scheduler."
-msgstr ""
+msgstr "Los flujos de trabajo marcado activarán o desactivarán su planificador"
 
 #. module: omna
 #: model_terms:ir.ui.view,arch_db:omna.view_action_start_workflows_wizard
 msgid "The marked flows will start their processing"
-msgstr ""
+msgstr "Los flujos de trabajo marcados empezarán su procesamiento"
 
 #. module: omna
 #: code:addons/omna/models/models.py:0
 #, python-format
 msgid "The task to execute the workflow have been created, please go to \"System\\Tasks\" to check out the task status."
-msgstr ""
+msgstr "La tarea para la ejecución del flujo de trabajo se ha creado, por favor vaya a  \"Sistema\\Tareas\" para verificar el estado de la misma. "
 
 #. module: omna
 #: code:addons/omna/models/models.py:0
 #, python-format
 msgid "The task to install the collection have been created, please go to \"System\\Tasks\" to check out the task status."
-msgstr ""
+msgstr "La tarea para la instalación de la colección se ha creado, por favor vaya a  \"Sistema\\Tareas\" para verificar el estado de la misma. "
 
 #. module: omna
 #: code:addons/omna/models/models.py:0
 #, python-format
 msgid "The task to uninstall the collection have been created, please go to \"System\\Tasks\" to check out the task status."
-msgstr ""
+msgstr "La tarea para desinstalar la colección se ha creado, por favor vaya a  \"Sistema\\Tareas\" para verificar el estado de la misma. "
 
 #. module: omna
 #: model:res.groups,comment:omna.group_omna_manager
@@ -1714,12 +1729,14 @@ msgid ""
 "The user will have access to the all OMNA features.\n"
 "            "
 msgstr ""
+"El usuario tendrá acceso a todas las funcionalidades de OMNA.\n"
+"            "
 
 #. module: omna
 #: code:addons/omna/models/models.py:0
 #, python-format
 msgid "The workflow's status have been changed."
-msgstr ""
+msgstr "El estado del flujo de trabajo ha cambiado."
 
 #. module: omna
 #: model:ir.model.fields,help:omna.field_omna_settings__module_account_batch_payment
@@ -1792,7 +1809,12 @@ msgid "Unauthorize"
 msgstr "Desautorizar"
 
 #. module: omna
-#: code:addons/omna/models/models.py:0 model_terms:ir.ui.view,arch_db:omna.omna_collection_form_view
+#: model_terms:ir.ui.view,arch_db:omna.omna_collection_form_view
+msgid "Uninstall"
+msgstr "Desinstalar"
+
+#. module: omna
+#: code:addons/omna/models/models.py:0
 #, python-format
 msgid "Uninstall Collection"
 msgstr "Desinstalar Colección"
@@ -1866,7 +1888,7 @@ msgstr "Avisos en facturas"
 #: model:ir.actions.act_window,name:omna.action_omna_webhook model:ir.ui.menu,name:omna.menu_omna_webhooks model_terms:ir.ui.view,arch_db:omna.omna_webhook_form_view
 #: model_terms:ir.ui.view,arch_db:omna.omna_webhook_tree_view
 msgid "Webhooks"
-msgstr "Webhooks"
+msgstr ""
 
 #. module: omna
 #: model:ir.model.fields,field_description:omna.field_omna_webhook__omna_webhook_id
@@ -1885,8 +1907,8 @@ msgstr "Unidad de Medida de Peso"
 
 #. module: omna
 #: model_terms:ir.ui.view,arch_db:omna.view_sync_collections_wizard
-msgid "Wizard to import collections from OMNA."
-msgstr "Asistente para importar colecciones desde OMNA"
+msgid "Wizard to import available integrations from OMNA."
+msgstr "Asistente para importar las integraciones disponibles desde OMNA."
 
 #. module: omna
 #: model_terms:ir.ui.view,arch_db:omna.view_sync_integrations_wizard
@@ -1955,104 +1977,104 @@ msgstr "Flujos"
 #. module: omna
 #: model:ir.model,name:omna.model_omna_action_start_workflows_wizard
 msgid "omna.action_start_workflows_wizard"
-msgstr ""
+msgstr "omna.action_start_workflows_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_action_status_workflows_wizard
 msgid "omna.action_status_workflows_wizard"
-msgstr ""
+msgstr "omna.action_status_workflows_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_collection
 msgid "omna.collection"
-msgstr ""
+msgstr "omna.collection"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_filters
 msgid "omna.filters"
-msgstr ""
+msgstr "omna.filters"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_flow
 msgid "omna.flow"
-msgstr ""
+msgstr "omna.flow"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_integration
 msgid "omna.integration"
-msgstr ""
+msgstr "omna.integration"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_integration_channel
 msgid "omna.integration_channel"
-msgstr ""
+msgstr "omna.integration_channel"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_publish_product_wzd
 msgid "omna.publish_product_wzd"
-msgstr ""
+msgstr "omna.publish_product_wzd"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_settings
 msgid "omna.settings"
-msgstr ""
+msgstr "omna.settings"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_signin_settings
 msgid "omna.signin.settings"
-msgstr ""
+msgstr "omna.signin.settings"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_sync_collections_wizard
 msgid "omna.sync_collections_wizard"
-msgstr ""
+msgstr "omna.sync_collections_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_sync_integrations_wizard
 msgid "omna.sync_integrations_wizard"
-msgstr ""
+msgstr "omna.sync_integrations_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_sync_orders_wizard
 msgid "omna.sync_orders_wizard"
-msgstr ""
+msgstr "omna.sync_orders_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_sync_products_wizard
 msgid "omna.sync_products_wizard"
-msgstr ""
+msgstr "omna.sync_products_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_sync_tenants_wizard
 msgid "omna.sync_tenants_wizard"
-msgstr ""
+msgstr "omna.sync_tenants_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_sync_workflows_wizard
 msgid "omna.sync_workflows_wizard"
-msgstr ""
+msgstr "omna.sync_workflows_wizard"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_task
 msgid "omna.task"
-msgstr ""
+msgstr "omna.task"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_task_execution
 msgid "omna.task.execution"
-msgstr ""
+msgstr "omna.task.execution"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_task_notification
 msgid "omna.task.notification"
-msgstr ""
+msgstr "omna.task.notification"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_tenant
 msgid "omna.tenant"
-msgstr ""
+msgstr "omna.tenant"
 
 #. module: omna
 #: model:ir.model,name:omna.model_omna_webhook
 msgid "omna.webhook"
-msgstr ""
+msgstr "omna.webhook"

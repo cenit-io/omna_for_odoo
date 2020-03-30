@@ -25,7 +25,7 @@ class OmnaSyncCollections(models.TransientModel):
             requester = True
             collections = []
             while requester:
-                response = self.get('collections', {'limit': limit, 'offset': offset})
+                response = self.get('available/integrations', {'limit': limit, 'offset': offset})
                 data = response.get('data')
                 collections.extend(data)
                 if len(data) < limit:

@@ -5,7 +5,7 @@
             <field name="name">omna.integration_channel.tree</field>
             <field name="model">omna.integration_channel</field>
             <field name="arch" type="xml">
-                <tree string="Available Integrations">
+                <tree string="Available Integration Channels">
                     <field name="title"/>
                     <field name="name"/>
                     <field name="group"/>
@@ -47,13 +47,13 @@
         </record>
 
         <record id="action_omna_integration_channel" model="ir.actions.act_window">
-            <field name="name">Available Integrations</field>
+            <field name="name">Available Integration Channels</field>
             <field name="res_model">omna.integration_channel</field>
             <field name="view_mode">kanban,tree</field>
         </record>
 
-        <menuitem id="menu_omna_my_integration_channels" name="Available Integrations" parent="menu_omna_integrations"
-                  sequence="0"
+        <menuitem id="menu_omna_my_integration_channels" name="Available Integration Channels" parent="menu_omna_integrations"
+                  sequence="10"
                   action="action_omna_integration_channel"/>
 
     </data>

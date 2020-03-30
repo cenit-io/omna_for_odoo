@@ -24,7 +24,7 @@ class OmnaIntegration(models.Model):
     @api.model
     def _get_integrations_channel_selection(self):
         try:
-            response = self.get('integrations/channels', {})
+            response = self.get('available/integrations/channels', {})
             selection = []
             for channel in response.get('data'):
                 selection.append((channel.get('name'), channel.get('title')))
@@ -60,7 +60,7 @@ class OmnaIntegration(models.Model):
                 vals_list['integration_id'] = response.get('data').get('id')
                 return super(OmnaIntegration, self).create(vals_list)
             else:
-                raise exceptions.AccessError("Error trying to push integration to Omna's API.")
+                raise exceptions.AccessError(_("Error trying to push integration to Omna's API."))
         else:
             return super(OmnaIntegration, self).create(vals_list)
 
@@ -710,7 +710,7 @@ class OmnaCollection(models.Model):
 
     def install_collection(self):
         self.ensure_one()
-        self.patch('collections/%s' % self.omna_id, {})
+        self.patch('available/integrations/%s' % self.omna_id, {})
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -723,7 +723,7 @@ class OmnaCollection(models.Model):
 
     def uninstall_collection(self):
         self.ensure_one()
-        self.delete('collections/%s' % self.omna_id, {})
+        self.delete('available/integrations/%s' % self.omna_id, {})
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -771,7 +771,7 @@ class OmnaIntegrationChannel(models.Model):
         self.check_access_rights('read')
         fields = self.check_field_access_rights('read', fields)
         result = []
-        channels = self.get('integrations/channels', {})
+        channels = self.get('available/integrations/channels', {})
         for channel in channels.get('data'):
             res = {
                 'id': '1-' + channel.get('name'),  # amazing hack needed to open records with virtual ids
