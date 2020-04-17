@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'OMNA Marketplace Connector',
-    'version': '13.0.0.1.0',
+    'version': '12.0.0.1.0',
     'category': 'Sales',
     'summary': 'Integration: Shopify, Shopee, Lazada, Qoo10, MercadoLibre, Backmarket, Shipstation',
     'description': 'Integrate global online marketplaces & web-stores with Odoo. Sync products, inventory and orders from multiple channels',
@@ -11,7 +11,7 @@
     'support': 'support@omna.io',
 
     # any module necessary for this one to work correctly
-    'depends': ['stock', 'sale_management', 'account'],
+    'depends': ['base', 'sale_management'],
 
     # always loaded
     'data': [
@@ -42,6 +42,7 @@
         'wizard/omna_sync_tenants_view.xml',
         'wizard/omna_sync_collections_view.xml',
         'wizard/omna_publish_product_view.xml',
+        'wizard/omna_unpublish_product_view.xml',
 
         # initial data
         'data/dow.xml',
