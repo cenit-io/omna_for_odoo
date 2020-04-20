@@ -8,7 +8,14 @@
                 <!-- systray -->
                 <script type="text/javascript" src="/omna/static/src/js/omna_sign_in.js"></script>
                 <script type="text/javascript" src="/omna/static/src/js/systray_tenant_menu.js"></script>
+<!--                Fields-->
+                <script type="text/javascript" src="/omna/static/src/js/fields/omna_basic_fields.js"/>
+                <script type="text/javascript" src="/omna/static/src/js/fields/omna_field_registry.js"/>
             </xpath>
+
+            <link rel="stylesheet" type="text/scss" href="/web/static/src/scss/webclient.scss" position="after">
+                <link rel="stylesheet" type="text/scss" href="/omna/static/src/scss/webclient.scss"/>
+            </link>
         </template>
 
     </data>

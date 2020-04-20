@@ -49,10 +49,9 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
-                <xpath expr="//page[@name='general_information']" position="inside">
-                    <group string="Integrations">
-                        <field name="integration_ids" nolabel="1" readonly="1" widget="many2many_tags"/>
-                    </group>
+                <xpath expr="//notebook[1]" position="after">
+                        <field name="integration_ids" invisible="1"/>
+                        <field nolabel="1" name="integrations_data" widget="omna_integrations" style="width: 100%;" required="1" attrs="{'invisible': [('is_product_variant', '=', True)]}"/>
                 </xpath>
                 <xpath expr="//div[@name='options']" position="inside">
                     <div>
@@ -98,6 +97,19 @@
 
         <menuitem id="menu_omna_products" name="Products" parent="menu_omna_data" sequence="1"
                   action="action_omna_products"/>
+
+        <record id="omna_product_normal_form_view" model="ir.ui.view">
+            <field name="name">omna.product.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook[1]" position="after">
+                        <field name="variant_integration_ids" invisible="1"/>
+                        <field nolabel="1" name="variant_integrations_data" widget="omna_integrations" style="width: 100%;" options="{'variant': True}" attrs="{'invisible': [('is_product_variant', '=', False)]}"/>
+                </xpath>
+            </field>
+        </record>
 
         <record id="omna_product_search_form_view" model="ir.ui.view">
             <field name="name">omna.product.product.search</field>

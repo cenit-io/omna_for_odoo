@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import http, exceptions
+from odoo import http, exceptions, _
 from odoo.http import request
 import odoo
 import logging
@@ -63,3 +63,12 @@ class Omna(http.Controller):
             return http.redirect_with_hash(redirect)
         else:
             raise exceptions.AccessError(_("Invalid integration id."))
+
+    @http.route('/omna/options/service', type='json', auth='user', methods=['GET', 'POST'], csrf=False)
+    def omna_options_service(self, path=None, term='', **kw):
+        if path:
+            data = request.env['omna.api'].get(path, {'term': term})
+            return data
+        else:
+            return False
+
