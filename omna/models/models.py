@@ -9,6 +9,8 @@ import dateutil.parser
 import werkzeug
 import pytz
 import json
+import os
+import base64
 
 
 def omna_id2real_id(omna_id):
@@ -49,13 +51,40 @@ class OmnaIntegration(models.Model):
     authorized = fields.Boolean('Authorized', required=True, default=False)
 
     @api.model
+    def _get_logo(self, channel):
+        if 'Lazada' in channel:
+            logo = 'static' + os.path.sep + 'src' + os.path.sep + 'img' + os.path.sep + 'lazada_logo.png'
+        elif 'Qoo10' in channel:
+            logo = 'static' + os.path.sep + 'src' + os.path.sep + 'img' + os.path.sep + 'qoo10_logo.png'
+        elif 'Shopee' in channel:
+            logo = 'static' + os.path.sep + 'src' + os.path.sep + 'img' + os.path.sep + 'shopee_logo.png'
+        elif 'Shopify' in channel:
+            logo = 'static' + os.path.sep + 'src' + os.path.sep + 'img' + os.path.sep + 'shopify_logo.png'
+        elif 'MercadoLibre' in channel:
+            logo = 'static' + os.path.sep + 'src' + os.path.sep + 'img' + os.path.sep + 'mercadolibre_logo.png'
+        else:
+            logo = 'static' + os.path.sep + 'src' + os.path.sep + 'img' + os.path.sep + 'marketplace_placeholder.jpg'
+        return logo
+
+    @api.model
     def create(self, vals_list):
+
+        if 'image_1920' not in vals_list:
+            logo = self._get_logo(vals_list['channel'])
+            path = os.path.join(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + '..'), logo)
+            with open(path, 'r+b') as fd:
+                res = fd.read()
+                if res:
+                    image = base64.b64encode(res).replace(b'\n', b'')
+                    vals_list['image_1920'] = image
+
         if not self._context.get('synchronizing'):
             self.check_access_rights('create')
             data = {
                 'name': vals_list['name'],
                 'channel': vals_list['channel']
             }
+
             response = self.post('integrations', {'data': data})
             if response.get('data').get('id'):
                 vals_list['integration_id'] = response.get('data').get('id')
@@ -64,6 +93,17 @@ class OmnaIntegration(models.Model):
                 raise exceptions.AccessError(_("Error trying to push integration to Omna's API."))
         else:
             return super(OmnaIntegration, self).create(vals_list)
+
+    def write(self, vals):
+        if 'image_1920' not in vals:
+            logo = self._get_logo(vals['channel'])
+            path = os.path.join(os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + os.path.sep + '..'), logo)
+            with open(path, 'r+b') as fd:
+                res = fd.read()
+                if res:
+                    image = base64.b64encode(res).replace(b'\n', b'')
+                    vals['image_1920'] = image
+        return super(OmnaIntegration, self).write(vals)
 
     def unlink(self):
         self.check_access_rights('unlink')
@@ -814,7 +854,7 @@ class OmnaIntegrationChannel(models.Model):
         elif group == 'MercadoLibre':
             logo = '/omna/static/src/img/mercadolibre_logo.png'
         else:
-            logo = '/omna/static/src/img/marketplace_placeholder.png'
+            logo = '/omna/static/src/img/marketplace_placeholder.jpg'
         return logo
 
     @api.model

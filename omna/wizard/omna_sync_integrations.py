@@ -24,7 +24,7 @@ class OmnaSyncIntegrations(models.TransientModel):
             requester = True
             integrations = []
             while requester:
-                response = self.get('integrations', {'limit': limit, 'offset': offset})
+                response = self.get('integrations', {'limit': limit, 'offset': offset, 'with_details': 'true'})
                 data = response.get('data')
                 integrations.extend(data)
                 if len(data) < limit:

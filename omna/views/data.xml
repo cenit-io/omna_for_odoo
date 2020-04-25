@@ -18,6 +18,18 @@
             </field>
         </record>
 
+        <record id="omna_sale_order_view_tree_inherit" model="ir.ui.view">
+            <field name="name">omna.sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+                <field name="amount_total" position="after">
+                    <field name="integration_id"/>
+                </field>
+            </field>
+        </record>
+
         <!-- Order Menu and Views -->
         <record id="action_omna_orders" model="ir.actions.act_window">
             <field name="name">Orders</field>
@@ -59,6 +71,17 @@
                         <label for="no_create_variants"/>
                     </div>
                 </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="omna_product_template_website_tree_view_inherit">
+            <field name="name">product.template.omna.tree</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="categ_id" position="after">
+                    <field name="integration_ids" widget="many2many_tags"/>
+                </field>
             </field>
         </record>
 
@@ -108,6 +131,17 @@
                         <field name="variant_integration_ids" invisible="1"/>
                         <field nolabel="1" name="variant_integrations_data" widget="omna_integrations" style="width: 100%;" options="{'variant': True}" attrs="{'invisible': [('is_product_variant', '=', False)]}"/>
                 </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="product_product_omna_tree_view_inherit">
+            <field name="name">product.product.omna.tree</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <field name="barcode" position="after">
+                    <field name="variant_integration_ids" widget="many2many_tags"/>
+                </field>
             </field>
         </record>
 
