@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_reimport_order_wzd" model="ir.ui.view">
+            <field name="name">omna.reimport.order.wzd.form</field>
+            <field name="model">omna.reimport_order_wzd</field>
+            <field name="arch" type="xml">
+                <form string="Reimport Order">
+                    <group>
+                        <div>
+                            Wizard to reimport order from OMNA.
+                        </div>
+                    </group>
+                    <footer>
+                        <button string='Reimport Order' name="reimport_order" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_reimport_order_wzd">
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="name">Reimport Order</field>
+            <field name="res_model">omna.reimport_order_wzd</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_view_types">form</field>
+        </record>
+
+    </data>
+</odoo>

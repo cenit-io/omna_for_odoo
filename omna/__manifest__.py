@@ -43,6 +43,9 @@
         'wizard/omna_sync_collections_view.xml',
         'wizard/omna_publish_product_view.xml',
         'wizard/omna_unpublish_product_view.xml',
+        'wizard/omna_export_order_view.xml',
+        'wizard/omna_reimport_order_view.xml',
+        'wizard/omna_import_resources_view.xml',
 
         # initial data
         'data/dow.xml',

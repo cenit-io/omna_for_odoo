@@ -20,7 +20,7 @@
         </record>
 
         <!-- Add action entry in the Action Menu for Product -->
-        <record model="ir.actions.act_window" id="publish_product_wzd">
+        <record model="ir.actions.act_window" id="action_publish_product_wzd">
             <field name="binding_model_id" ref="product.model_product_template"/>
             <field name="name">Publish Product</field>
             <field name="res_model">omna.publish_product_wzd</field>
