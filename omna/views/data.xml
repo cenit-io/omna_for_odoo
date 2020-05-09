@@ -54,6 +54,25 @@
                   action="action_omna_orders"/>
         <!-- End Order -->
 
+
+        <!-- End Order -->
+        <record id="view_integration_product" model="ir.ui.view">
+            <field name="name">omna.integration.product.form</field>
+            <field name="model">omna.integration_product</field>
+            <field name="arch" type="xml">
+                <form string="Link Product">
+                    <group>
+                        <field name="product_template_id" domain="[('id', '=', active_id)]" readonly="1"/>
+                        <!--<field name="integration_ids" widget="many2many_tags"/>-->
+                        <field name="integration_ids"/>
+                        <field name="link_with_its_variants"/>
+                        <field name="delete_from_integration"/>
+                    </group>
+
+                </form>
+            </field>
+        </record>
+
         <!--         Product Menu and Views-->
         <record id="omna_product_template_form_view" model="ir.ui.view">
             <field name="name">omna.product.template.product.form</field>
@@ -62,7 +81,7 @@
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
                 <xpath expr="//notebook[1]" position="after">
-                    <field name="integration_ids" invisible="1"/>
+
                     <field nolabel="1" name="integrations_data" widget="omna_integrations" style="width: 100%;"
                            required="1" attrs="{'invisible': [('is_product_variant', '=', True)]}"/>
                 </xpath>
@@ -71,6 +90,25 @@
                         <field name="no_create_variants"/>
                         <label for="no_create_variants"/>
                     </div>
+                </xpath>
+
+                <xpath expr="//page[@name='general_information']" position="after">
+                    <page name="integration" string="Link a Product">
+                        <field name="integration_ids" widget="one2many" context="{'default_product_template_id' : active_id}">
+                            <tree string="Integration" edit="true">
+                                <field name="product_template_id"/>
+                                <field name="integration_ids"  widget="many2many_tags"/>
+                                <field name="link_with_its_variants"/>
+                                <field name="delete_from_integration"/>
+                            </tree>
+                        </field>
+
+                        <p class="oe_grey">
+                            <strong>Warning</strong>: adding or deleting attributes
+                            will delete and recreate existing variants and lead
+                            to the loss of their possible customizations.
+                        </p>
+                    </page>
                 </xpath>
             </field>
         </record>
