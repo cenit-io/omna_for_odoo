@@ -9,3 +9,4 @@ access_omna_task_execution,access_omna_task_execution,model_omna_task_execution,
 access_omna_task_notification,access_omna_task_notification,model_omna_task_notification,omna.group_omna_manager,1,1,1,1
 access_omna_tenant,access_omna_tenant,model_omna_tenant,omna.group_omna_manager,1,1,1,1
 access_omna_collection,access_omna_collection,model_omna_collection,omna.group_omna_manager,1,1,1,1
+access_omna_integration_product,access_omna_integration_product,model_omna_integration_product,omna.group_omna_manager,1,1,1,1
