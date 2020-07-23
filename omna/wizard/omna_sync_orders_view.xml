@@ -9,8 +9,22 @@
                 <form string="Import Orders">
                     <group>
                         <div>
-                            Wizard to import orders from OMNA.
+                            Wizard to import orders from OMNA. You can choose
+                            the type of import you want to perform: all,
+                            by integration or by its number.
                         </div>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="sync_type" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="integration_id"
+                                   attrs="{'invisible': [('sync_type', '=', 'all')],
+                                   'required': [('sync_type', '!=', 'all')]}"/>
+                            <field name="number" attrs="{'invisible': [('sync_type', '!=', 'number')],
+                                   'required': [('sync_type', '=', 'number')]}"/>
+                        </group>
                     </group>
                     <footer>
                         <button string='Import orders' name="sync_orders" type="object" class="btn-primary"/>

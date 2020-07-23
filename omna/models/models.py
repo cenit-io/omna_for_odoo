@@ -673,6 +673,19 @@ class SaleOrder(models.Model):
 
         return True
 
+    @api.multi
+    def action_cancel_from_integration(self):
+        for order in self.filtered(lambda x: x.origin == 'OMNA'):
+            response = self.delete('integrations/%s/orders/%s' %
+                                   (order.integration_id.integration_id, order.name))
+            if response:
+                # order.action_cancel()
+                self.env.user.notify_channel('warning', _(
+                    'The task to cancel the order from the integration have been created, please '
+                    'go to "System\Tasks" to check out the task status.'),
+                                             _("Information"), True)
+                order.write({'state': 'cancel'})
+
 
 class OmnaOrderLine(models.Model):
     _inherit = 'sale.order.line'
