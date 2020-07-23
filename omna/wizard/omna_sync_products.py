@@ -5,7 +5,7 @@ import base64
 import json
 import logging
 from datetime import datetime, timezone, time
-from odoo import models, api, exceptions
+from odoo import models, api, exceptions, fields
 
 
 _logger = logging.getLogger(__name__)
@@ -14,6 +14,22 @@ _logger = logging.getLogger(__name__)
 class OmnaSyncProducts(models.TransientModel):
     _name = 'omna.sync_products_wizard'
     _inherit = 'omna.api'
+
+    sync_type = fields.Selection([('all', 'All'),
+                                  ('by_integration', 'By Integration'),
+                                  ('by_external_id', 'By External Id'),
+                                  ('number', 'Number')], 'Import Type',
+                                 required=True, default='all')
+    integration_id = fields.Many2one('omna.integration', 'Integration')
+    number = fields.Char(u"Omna's Product Number")
+    external_id = fields.Char(u"External Product Id")
+
+    @api.onchange('sync_type')
+    def onchange_sync_type(self):
+        if self.sync_type == 'by_external_id':
+            self.number = False
+        elif self.sync_type == 'number':
+            self.external_id = False
 
     def sync_products(self):
         try:
@@ -32,14 +48,31 @@ class OmnaSyncProducts(models.TransientModel):
         offset = 0
         flag = True
         products = []
-        while flag:
-            response = self.get('products', {'limit': limit, 'offset': offset, 'with_details': 'true'})
-            data = response.get('data')
-            products.extend(data)
-            if len(data) < limit:
-                flag = False
+        if self.sync_type not in ['number', 'by_external_id']:
+            while flag:
+                if self.sync_type == 'all':
+                    response = self.get('products', {'limit': limit, 'offset': offset, 'with_details': 'true'})
+                else:
+                    response = self.get(
+                        'integrations/%s/products' % self.integration_id.integration_id,
+                        {'limit': limit, 'offset': offset})
+                data = response.get('data')
+                products.extend(data)
+                if len(data) < limit:
+                    flag = False
+                else:
+                    offset += limit
+        else:
+            if self.sync_type == 'by_external_id':
+                response = self.get(
+                    'integrations/%s/products/%s' % (self.integration_id.integration_id, self.external_id),
+                    {})
             else:
-                offset += limit
+                response = self.get(
+                    'products/%s' % self.number,
+                    {})
+            data = response.get('data')
+            products.append(data)
 
         product_obj = self.env['product.template']
         for product in products:
@@ -61,8 +94,10 @@ class OmnaSyncProducts(models.TransientModel):
                     integrations = []
                     for integration in product.get('integrations'):
                         integrations.append(integration.get('id'))
-                    ids = self.env['omna.integration'].search([('integration_id', 'in', integrations)]).ids
-                    data['integration_ids'] = [(6, 0, ids)]
+                    # ids = self.env['omna.integration'].search([('integration_id', 'in', integrations)]).ids
+                    # data['integration_ids'] = [(6, 0, ids)]
+                    omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
+                    data['integration_ids'] = [(0, 0, {'integration_ids': [(6, 0, omna_integration.ids)]})]
 
                 act_product.with_context(synchronizing=True).write(data)
                 try:
@@ -87,8 +122,10 @@ class OmnaSyncProducts(models.TransientModel):
                     integrations = []
                     for integration in product.get('integrations'):
                         integrations.append(integration.get('id'))
-                    ids = self.env['omna.integration'].search([('integration_id', 'in', integrations)]).ids
-                    data['integration_ids'] = [(6, 0, ids)]
+                    # ids = self.env['omna.integration'].search([('integration_id', 'in', integrations)]).ids
+                    # data['integration_ids'] = [(6, 0, ids)]
+                    omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
+                    data['integration_ids'] = [(0, 0, {'integration_ids': [(6, 0, omna_integration.ids)]})]
 
                 act_product = product_obj.with_context(synchronizing=True).create(data)
                 try:

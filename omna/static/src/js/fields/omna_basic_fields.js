@@ -158,16 +158,27 @@ var FieldOmnaIntegrations = DebouncedField.extend({
                 }
                 break;
             case 'single_select_with_remote_options':
+                var name = ''
                 if (this.mode !== 'edit' || field.readonly){
+                    if (field.options.length > 0) {
+                        var name = field.options[0].name
+                    }else{
+                        var name = ''
+                    }
                     return '<tr>' +
                                '<td class="o_td_label"><label class="o_form_label">' + field.label + '</label></td>'+
-                               '<td style="width: 100%;"><span name="type" class="o_field_widget">'+ field.options[0].name +'</span></td>'+
+                               '<td style="width: 100%;"><span name="type" class="o_field_widget">'+ name + '</span></td>'+
                            '</tr>';
                 }else{
+                    if (field.options.length > 0) {
+                        var name = field.options[0].name
+                    }else{
+                        var name = ''
+                    }
                     var $tr = $('<tr>');
                     $tr.append('<td class="o_td_label"><label class="o_form_label" for="'+ field.id +'">' + field.label + '</label></td>');
                     var $td = $('<td style="width: 100%;">');
-                    var $input = $('<input id="'+ field.id +'" class="o_field_char o_field_widget o_omna_input" data-integration="'+integration+'" name="'+ field.name +'" value="' + field.options[0].name + '" type="text">');
+                    var $input = $('<input id="'+ field.id +'" class="o_field_char o_field_widget o_omna_input" data-integration="'+integration+'" name="'+ field.name +'" value="' + name + '" type="text">');
                     if(field.required){
                         $input.addClass('o_omna_required_modifier');
                     }
@@ -430,7 +441,11 @@ var FieldOmnaIntegrations = DebouncedField.extend({
 
     _renderMultiSelectTags: function(value){
         var elements = [];
-        var selected = value ? value.split(',') : [];
+        if (value.length > 0) {
+            var selected = value ? value.split(',') : [];
+        }else{
+            var selected = [];
+        }
         $.each(selected, function(index, element){
            elements.push({id: element, display_name: element});
         });
@@ -521,7 +536,11 @@ var FieldOmnaIntegrations = DebouncedField.extend({
     },
 
     _getOptionsMultiSelect: function(field){
-        var selected = field.value ? field.value.split(',') : [];
+         if (field.value.length > 0) {
+            var selected = field.value ? field.value.split(',') : [];
+        }else{
+            var selected = [];
+        }
         var diff = [];
         $.each(field.options, function(index, el){
             if($.inArray(el, selected) == -1){

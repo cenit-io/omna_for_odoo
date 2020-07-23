@@ -12,6 +12,20 @@
                             Wizard to import products from OMNA.
                         </div>
                     </group>
+                    <group>
+                        <group>
+                            <field name="sync_type" widget="radio"/>
+                        </group>
+                        <group>
+                            <field name="integration_id"
+                                   attrs="{'invisible': [('sync_type', '=', 'all')],
+                                   'required': [('sync_type', '!=', 'all')]}"/>
+                            <field name="number" attrs="{'invisible': [('sync_type', '!=', 'number')],
+                                   'required': [('sync_type', '=', 'number')]}"/>
+                            <field name="external_id" attrs="{'invisible': [('sync_type', '!=', 'by_external_id')],
+                                   'required': [('sync_type', '=', 'by_external_id')]}"/>
+                        </group>
+                    </group>
                     <footer>
                         <button string='Import Products' name="sync_products" type="object" class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
