@@ -60,3 +60,16 @@ class OmnaSyncOrders(models.TransientModel):
             _logger.error(e)
             raise exceptions.AccessError(e)
 
+
+    def import_resources(self):
+        try:
+            result = self.get('integrations/%s/orders/import' % self.integration_id.integration_id, {})
+
+            self.env.user.notify_channel('warning',(
+                'The task to import the resources have been created, please go to "System\Tasks" to check out the task status.'),
+                                        ("Information"), True)
+            return {'type': 'ir.actions.act_window_close'}
+
+        except Exception as e:
+            _logger.error(e)
+            raise exceptions.AccessError(e)

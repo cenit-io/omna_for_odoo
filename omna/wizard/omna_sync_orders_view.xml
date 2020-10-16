@@ -8,8 +8,9 @@
             <field name="arch" type="xml">
                 <form string="Import Orders">
                     <group>
+                        <!--You can import all orders or from a specific integration.-->
                         <div>
-                            Wizard to import orders from OMNA. You can choose
+                            Wizard to import the orders from OMNA. You can choose
                             the type of import you want to perform: all,
                             by integration or by its number.
                         </div>
