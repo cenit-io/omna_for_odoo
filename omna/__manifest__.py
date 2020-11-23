@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'OMNA Marketplace Connector',
-    'version': '13.0.0.1.0',
+    'version': '12.0.0.1.0',
     'category': 'Sales',
     'summary': 'Integration: Shopify, Shopee, Lazada, Qoo10, MercadoLibre, Backmarket, Shipstation',
     'description': 'Integrate global online marketplaces & web-stores with Odoo. Sync products, inventory and orders from multiple channels',
@@ -11,7 +11,7 @@
     'support': 'support@omna.io',
 
     # any module necessary for this one to work correctly
-    'depends': ['stock', 'sale_management', 'account'],
+    'depends': ['base', 'sale_management', 'board'],
 
     # always loaded
     'data': [
@@ -31,9 +31,11 @@
         'views/tenants.xml',
         'views/collections.xml',
         'views/omna_templates.xml',
-
+        # arreglar para odoo14
+        # 'views/dashboard.xml',
         # wizard
         'wizard/omna_sync_products_view.xml',
+        'wizard/omna_sync_variant_view.xml',
         'wizard/omna_sync_orders_view.xml',
         'wizard/omna_sync_integrations_view.xml',
         'wizard/omna_sync_workflows_view.xml',
@@ -41,11 +43,23 @@
         'wizard/omna_action_status_workflows_view.xml',
         'wizard/omna_sync_tenants_view.xml',
         'wizard/omna_sync_collections_view.xml',
-        'wizard/omna_publish_product_view.xml',
-        'wizard/omna_unpublish_product_view.xml',
-        'wizard/omna_export_order_view.xml',
-        'wizard/omna_reimport_order_view.xml',
-        'wizard/omna_import_resources_view.xml',
+        #'wizard/omna_publish_product_view.xml',
+        #'wizard/omna_unpublish_product_view.xml',
+
+
+        # arreglar odoo14
+        # 'wizard/omna_export_order_view.xml',
+	    'wizard/omna_export_orders_from_integration_view.xml',
+        # arreglar odoo14
+        # 'wizard/omna_reimport_order_view.xml',
+        # 'wizard/omna_import_resources_view.xml',
+        # 'wizard/omna_update_product_in_integration.xml',
+        # 'wizard/omna_update_variant_in_integration.xml',
+        # 'wizard/wizard_create_variant.xml',
+        'wizard/omna_sync_categories_view.xml',
+        'wizard/omna_sync_brands_view.xml',
+        'wizard/omna_sync_doc_orders_view.xml',
+
 
         # initial data
         'data/dow.xml',
@@ -55,6 +69,7 @@
     ],
     'qweb': [
         'static/src/xml/systray.xml',
+        'static/src/xml/dashboard_template.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

@@ -14,6 +14,8 @@
                 <xpath expr="//filter[@name='my_sale_orders_filter']" position="before">
                     <filter name="current_tenant" string="Current Tenant"
                             domain="[('omna_tenant_id', '=', context.get('omna_current_tenant'))]"/>
+                    <filter name="integration_id" string="Integration"/>
+                    <filter string="Integration" name="integration_id" context="{'group_by': 'integration_id'}"/>
                 </xpath>
             </field>
         </record>
@@ -29,6 +31,58 @@
                 </field>
             </field>
         </record>
+
+        <record id="omna_view_order_form_inherit" model="ir.ui.view">
+            <field name="name">omna.sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <field name="payment_term_id" position="after">
+                    <field name="integration_name"/>
+                </field>
+                <xpath expr="//page[@name='order_lines']" position="after">
+                    <page name="document" string="Document">
+                        <group>
+                            <field name="doc_omna"/>
+                        </group>
+                    </page>
+
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Cancel from integration Button in action menu -->
+        <record id="sale_order_action_cancel_from_integration" model="ir.actions.server">
+            <field name="name">Cancel from Integration</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="state">code</field>
+            <field name="code">action = records.action_cancel_from_integration()</field>
+        </record>
+
+        <!-- Retrieve an Order -->
+        <record id="sale_order_action_retrieve_order" model="ir.actions.server">
+            <field name="name">Retrieve an Order</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="state">code</field>
+            <field name="code">action = records.retrieve_order()</field>
+        </record>
+
+        <!--Hide Invoice Order Button arreglar para el odoo14-->
+<!--        <record id="sale.action_view_sale_advance_payment_inv" model="ir.actions.act_window">-->
+<!--            <field name="name">Invoice Order</field>-->
+<!--            <field name="type">ir.actions.act_window</field>-->
+<!--            <field name="res_model">sale.advance.payment.inv</field>-->
+<!--            <field name="view_type">form</field>-->
+<!--            <field name="view_mode">form</field>-->
+<!--            <field name="view_id" ref="sale.view_order_form"/>-->
+<!--            <field name="target">new</field>-->
+<!--            <field name="groups_id" eval="[(6,0,[ref('base.group_no_one')])]"/>-->
+<!--            <field name="binding_model_id" ref="sale.model_sale_order" />-->
+<!--            <field name="domain">[('omna_id', '=', False)]</field>-->
+<!--        </record>-->
 
         <!-- Order Menu and Views -->
         <record id="action_omna_orders" model="ir.actions.act_window">
@@ -50,9 +104,29 @@
             </field>
         </record>
 
-        <menuitem id="menu_omna_orders" name="Orders" parent="menu_omna_data" sequence="0"
+        <menuitem id="menu_omna_orders" name="Orders" parent="menu_omna_data" sequence="1"
                   action="action_omna_orders"/>
         <!-- End Order -->
+
+
+        <!-- End Order -->
+        <record id="view_integration_product" model="ir.ui.view">
+            <field name="name">omna.integration.product.form</field>
+            <field name="model">omna.integration_product</field>
+            <field name="arch" type="xml">
+                <form string="Link Product">
+                    <group>
+                        <!--<field name="product_template_id" domain="[('id', '=', active_id)]"/>-->
+                        <field name="product_template_id" domain="[('id', '=', active_id)]" readonly="1"/>
+                        <!--<field name="integration_ids" widget="many2many_tags"/>-->
+                        <field name="integration_ids"/>
+                        <field name="link_with_its_variants"/>
+                        <field name="delete_from_integration"/>
+                    </group>
+
+                </form>
+            </field>
+        </record>
 
         <!--         Product Menu and Views-->
         <record id="omna_product_template_form_view" model="ir.ui.view">
@@ -61,9 +135,23 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="priority" eval="8"/>
             <field name="arch" type="xml">
-                <xpath expr="//notebook[1]" position="after">
-                        <field name="integration_ids" invisible="1"/>
-                        <field nolabel="1" name="integrations_data" widget="omna_integrations" style="width: 100%;" required="1" attrs="{'invisible': [('is_product_variant', '=', True)]}"/>
+                <xpath expr="//header" position="inside">
+                    <button string="Create New Variant" name="action_create_variant" type="object"
+                            class="oe_highlight" attrs="{'invisible':[('id','=',False)]}"/>
+                </xpath>
+
+                <xpath expr="//field[@name='categ_id']" position="after">
+                    <field name="omna_product_id" attrs="{'invisible': [('is_product_variant', '=', True)]}"/>
+                    <!--                    <field name="category_ids"/>-->
+                </xpath>
+
+                <xpath expr="//page[@name='sales']" position="after">
+                    <page name="integrations" string="Integrations">
+                        <group>
+                            <field nolabel="1" name="integrations_data" widget="omna_integrations"
+                                   style="width: 100%;"/>
+                        </group>
+                    </page>
                 </xpath>
                 <xpath expr="//div[@name='options']" position="inside">
                     <div>
@@ -71,6 +159,39 @@
                         <label for="no_create_variants"/>
                     </div>
                 </xpath>
+
+                <xpath expr="//page[@name='general_information']" position="after">
+                    <page name="integration" string="Link a Product">
+                        <field name="integration_ids" widget="one2many"
+                               context="{'default_product_template_id' : active_id}">
+                            <tree string="Integration" edit="true">
+                                <field name="product_template_id"/>
+                                <field name="integration_ids" widget="many2many_tags"/>
+                                <field name="link_with_its_variants"/>
+                                <field name="delete_from_integration"/>
+                            </tree>
+                            <!--<field name="variant_external_id_integration_ids" invisible="1"/>-->
+                        </field>
+                        <field name="external_id_integration_ids"/>
+                        <p class="oe_grey">
+                            <strong>Warning</strong>: adding or deleting attributes
+                            will delete and recreate existing variants and lead
+                            to the loss of their possible customizations.
+                        </p>
+                    </page>
+                </xpath>
+
+              <!--  <xpath expr="//field[@name='description']" position="replace">
+                    <field name="description" nolabel="1" required='1' placeholder="This note is only for internal purposes."/>
+                </xpath> -->
+
+                <xpath expr="//field[@name='description']" position="replace">
+                    <field name="description" nolabel="1" placeholder="This note is only for internal purposes."/>
+                </xpath>
+
+                <!--                <xpath expr="//field[@name='categ_id']" position="after">-->
+                <!--                    <field name="brand_id"/>-->
+                <!--                </xpath>-->
             </field>
         </record>
 
@@ -96,6 +217,12 @@
                     <filter name="current_tenant" string="Current Tenant"
                             domain="[('omna_tenant_id', '=', context.get('omna_current_tenant'))]"/>
                 </xpath>
+                <xpath expr="//filter[@name='filter_to_sell']" position="after">
+                    <filter name="filter_category" string="By Category"
+                            domain="[('id', 'in', context.get('product_category_ids',[]))]"/>
+                    <filter name="filter_brand" string="By Brand"
+                            domain="[('id', 'in', context.get('product_brand_ids',[]))]"/>
+                </xpath>
             </field>
         </record>
 
@@ -105,7 +232,8 @@
             <field name="res_model">product.template</field>
             <field name="view_mode">kanban,tree,form,activity</field>
             <field name="context">{"search_default_filter_to_sell":1, "sale_multi_pricelist_product_template": 1,
-                "search_default_current_tenant": 1}
+                "search_default_current_tenant": 1, "search_default_filter_category": 1, "search_default_filter_brand":
+                1}
             </field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
@@ -118,21 +246,23 @@
             </field>
         </record>
 
-        <menuitem id="menu_omna_products" name="Products" parent="menu_omna_data" sequence="1"
+        <menuitem id="menu_omna_products" name="Products" parent="menu_omna_data" sequence="2"
                   action="action_omna_products"/>
-
-        <record id="omna_product_normal_form_view" model="ir.ui.view">
-            <field name="name">omna.product.product.form</field>
-            <field name="model">product.product</field>
-            <field name="inherit_id" ref="product.product_normal_form_view"/>
-            <field name="priority" eval="8"/>
-            <field name="arch" type="xml">
-                <xpath expr="//notebook[1]" position="after">
-                        <field name="variant_integration_ids" invisible="1"/>
-                        <field nolabel="1" name="variant_integrations_data" widget="omna_integrations" style="width: 100%;" options="{'variant': True}" attrs="{'invisible': [('is_product_variant', '=', False)]}"/>
-                </xpath>
-            </field>
-        </record>
+<!--            arreglar para el odoo14-->
+<!--        <record id="omna_product_normal_form_view" model="ir.ui.view">-->
+<!--            <field name="name">omna.product.product.form</field>-->
+<!--            <field name="model">product.product</field>-->
+<!--            <field name="inherit_id" ref="product.product_normal_form_view"/>-->
+<!--            <field name="priority" eval="8"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="//notebook[1]" position="after">-->
+<!--                    <field name="variant_integration_ids"/>-->
+<!--                    <field nolabel="1" name="variant_integrations_data" widget="omna_integrations" style="width: 100%;"-->
+<!--                           options="{'variant': True}" attrs="{'invisible': [('is_product_variant', '=', False)]}"/>-->
+<!--                    &lt;!&ndash;<field name="external_id_integration_ids" invisible="1"/>&ndash;&gt;-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
 
         <record model="ir.ui.view" id="product_product_omna_tree_view_inherit">
             <field name="name">product.product.omna.tree</field>
@@ -177,9 +307,149 @@
             </field>
         </record>
 
-        <menuitem id="menu_omna_products_variants" name="Products Variants" parent="menu_omna_data" sequence="1"
+        <menuitem id="menu_omna_products_variants" name="Products Variants" parent="menu_omna_data" sequence="3"
                   action="action_omna_products_variants"/>
+
         <!-- End Product -->
 
+        <record id="product_category_form_view_inherit" model="ir.ui.view">
+            <field name="name">product.category.form.view.inherit</field>
+            <field name="model">product.category</field>
+            <field name="inherit_id" ref="product.product_category_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='first']" position="after">
+                    <group>
+                        <group>
+                            <field name="omna_category_id"/>
+                        </group>
+                    </group>
+                </xpath>
+                <xpath expr="//div[@name='button_box']" position="replace">
+                    <div class="oe_button_box" name="button_box">
+                        <field name="product_category_ids" invisible="1"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button"
+                                    name="view_product_category"
+                                    icon="fa-th-list"
+                                    type="object">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="product_count_cat"/>
+                                    </span>
+                                    <span class="o_stat_text">Products</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                </xpath>
+            </field>
+        </record>
+
+        <record id="omna_category_search_view_inherit" model="ir.ui.view">
+            <field name="name">omna.category.search.inherit</field>
+            <field name="model">product.category</field>
+            <field name="inherit_id" ref="product.product_category_search_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='parent_id']" position="after">
+                    <field name="omna_category_id" string="Omna ID"/>
+                </xpath>
+                <xpath expr="//field[@name='parent_id']" position="before">
+                    <filter name="current_tenant" string="Current Tenant"
+                            domain="[('omna_tenant_id', '=', context.get('omna_current_tenant'))]"/>
+                    <filter name="integration_id" string="Integration"/>
+                    <filter string="Integration" name="integration_id" context="{'group_by': 'integration_id'}"/>
+                </xpath>
+
+            </field>
+        </record>
+<!--            arreglar para el odoo14-->
+<!--        <record id="action_omna_product_category" model="ir.actions.act_window">-->
+<!--            <field name="name">Product Categories</field>-->
+<!--            <field name="type">ir.actions.act_window</field>-->
+<!--            <field name="res_model">product.category</field>-->
+<!--            <field name="view_type">form</field>-->
+<!--            <field name="context">{'search_default_current_tenant': 1}</field>-->
+<!--            <field name="search_view_id" ref="omna_category_search_view_inherit"/>-->
+<!--            <field name="view_id" ref="product.product_category_list_view"/>-->
+<!--        </record>-->
+
+        <!--            arreglar para el odoo14-->
+
+<!--        <menuitem id="categories" name="Categories" parent="menu_omna_data" sequence="4"-->
+<!--                  action="action_omna_product_category"/>-->
+
+        <record id="product_brand_form_view" model="ir.ui.view">
+            <field name="name">product.brand.form</field>
+            <field name="model">product.brand</field>
+            <field name="arch" type="xml">
+                <form string="Product Brand">
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button"
+                                    name="view_product_brand"
+                                    icon="fa-th-list"
+                                    type="object">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="product_count_br"/>
+                                    </span>
+                                    <span class="o_stat_text">Products</span>
+                                </div>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="omna_brand_id"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="product_brand_search_view" model="ir.ui.view">
+            <field name="name">product.brand.search</field>
+            <field name="model">product.brand</field>
+            <field name="arch" type="xml">
+                <search string="Product Brand">
+                    <field name="name" string="Product Brand"/>
+                    <field name="omna_brand_id" string="Omna ID"/>
+                    <filter name="current_tenant" string="Current Tenant"
+                            domain="[('omna_tenant_id', '=', context.get('omna_current_tenant'))]"/>
+                    <filter name="integration_id" string="Integration"/>
+                    <filter string="Integration" name="integration_id" context="{'group_by': 'integration_id'}"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="product_brand_view" model="ir.ui.view">
+            <field name="name">product.brand.tree</field>
+            <field name="model">product.brand</field>
+            <field name="arch" type="xml">
+                <tree string="Product Brand">
+                    <field name="name"/>
+                    <field name="omna_brand_id"/>
+                </tree>
+            </field>
+        </record>
+        <!-- Actions-->
+<!--        arreglar para el odoo14-->
+<!--        <record model="ir.actions.act_window" id="product_brand_action">-->
+<!--            <field name="name">Product Brand</field>-->
+<!--            <field name="res_model">product.brand</field>-->
+<!--            <field name="view_type">form</field>-->
+<!--            <field name="view_mode">tree,form</field>-->
+<!--            <field name="context">{'search_default_current_tenant': 1}</field>-->
+<!--            <field name="search_view_id" ref="product_brand_search_view"/>-->
+<!--        </record>-->
+
+<!--        <menuitem name="Product Brand"-->
+<!--                  id="menu_product_brand"-->
+<!--                  action="product_brand_action"-->
+<!--                  parent="menu_omna_data"-->
+<!--                  sequence="5"-->
+<!--        />-->
     </data>
 </odoo>
