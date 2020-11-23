@@ -22,16 +22,10 @@ class OmnaImportResourcesWizard(models.TransientModel):
             integration = self.env['omna.integration'].search([('id', '=', self._context.get('active_id'))])
             result = self.get('integrations/%s/%s/import' % (integration.integration_id, self.resource), {})
 
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Import Resources'),
-                    'message': _(
-                        'The task to import the resources have been created, please go to "System\Tasks" to check out the task status.'),
-                    'sticky': True,
-                }
-            }
+            self.env.user.notify_channel('warning', _(
+                'The task to import the resources have been created, please go to "System\Tasks" to check out the task status.'),
+                                         _("Information"), True)
+            return {'type': 'ir.actions.act_window_close'}
 
         except Exception as e:
             _logger.error(e)

@@ -23,16 +23,10 @@ class OmnaExportOrderWizard(models.TransientModel):
                 data['target_integrarion_id'] = self.integration_id.integration_id
             result = self.put('orders/%s' % order.omna_id, {'data': data})
 
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Export Order'),
-                    'message': _(
-                        'The task to export the order have been created, please go to "System\Tasks" to check out the task status.'),
-                    'sticky': True,
-                }
-            }
+            self.env.user.notify_channel('warning', _(
+                'The task to export the order have been created, please go to "System\Tasks" to check out the task status.'),
+                                         _("Information"), True)
+            return {'type': 'ir.actions.act_window_close'}
 
         except Exception as e:
             _logger.error(e)

@@ -5,19 +5,18 @@ var core = require('web.core');
 var rpc = require('web.rpc');
 var basic_fields = require('web.basic_fields');
 var DebouncedField = basic_fields.DebouncedField;
-var Wysiwyg = require('web_editor.wysiwyg.root');
+var SummernoteManager = require('web_editor.rte.summernote');
+var transcoder = require('web_editor.transcoder');
 var qweb = core.qweb;
-var assetsLoaded = false;
 
 var FieldOmnaIntegrations = DebouncedField.extend({
     custom_events: _.extend({}, DebouncedField.prototype.custom_events, {
         field_changed: '_onFieldChanged',
-        wysiwyg_change: '_onChangeWysiwyg'
     }),
     events: _.extend({}, DebouncedField.prototype.events, {
         'input .omna_integrations_basic_field': '_onInput',
         'change .omna_integrations_basic_field': '_onChange',
-        'click .o_delete': '_onDeleteTag'
+        'click .o_delete': '_onDeleteTag',
     }),
 
     init: function () {
@@ -55,22 +54,8 @@ var FieldOmnaIntegrations = DebouncedField.extend({
     },
 
     start: function () {
+        new SummernoteManager(this);
         return this._super.apply(this, arguments);
-    },
-
-    willStart: function () {
-        var self = this;
-        if (!assetsLoaded) { // avoid flickering when begin to edit
-            assetsLoaded = new Promise(function (resolve) {
-                var wysiwyg = new Wysiwyg(self, {});
-                wysiwyg.attachTo($('<textarea>')).then(function () {
-                    wysiwyg.destroy();
-                    resolve();
-                });
-            });
-        }
-
-        return Promise.all([this._super(), assetsLoaded]);
     },
 
     /**
@@ -173,16 +158,27 @@ var FieldOmnaIntegrations = DebouncedField.extend({
                 }
                 break;
             case 'single_select_with_remote_options':
+                var name = ''
                 if (this.mode !== 'edit' || field.readonly){
+                    if (field.options.length > 0) {
+                        var name = field.options[0].name
+                    }else{
+                        var name = ''
+                    }
                     return '<tr>' +
                                '<td class="o_td_label"><label class="o_form_label">' + field.label + '</label></td>'+
-                               '<td style="width: 100%;"><span name="type" class="o_field_widget">'+ (field.options.length > 0 ? field.options[0].name : "") +'</span></td>'+
+                               '<td style="width: 100%;"><span name="type" class="o_field_widget">'+ name + '</span></td>'+
                            '</tr>';
                 }else{
+                    if (field.options.length > 0) {
+                        var name = field.options[0].name
+                    }else{
+                        var name = ''
+                    }
                     var $tr = $('<tr>');
                     $tr.append('<td class="o_td_label"><label class="o_form_label" for="'+ field.id +'">' + field.label + '</label></td>');
                     var $td = $('<td style="width: 100%;">');
-                    var $input = $('<input id="'+ field.id +'" class="o_field_char o_field_widget o_omna_input" data-integration="'+integration+'" name="'+ field.name +'" value="' + field.options[0].name + '" type="text">');
+                    var $input = $('<input id="'+ field.id +'" class="o_field_char o_field_widget o_omna_input" data-integration="'+integration+'" name="'+ field.name +'" value="' + name + '" type="text">');
                     if(field.required){
                         $input.addClass('o_omna_required_modifier');
                     }
@@ -323,8 +319,14 @@ var FieldOmnaIntegrations = DebouncedField.extend({
                     var $label = $('<td class="o_td_label"><label class="o_form_label">' + field.label + '</label></td>');
                     var $td = $('<td style="width: 100%;">');
                     var $div = $('<div class="oe_form_field oe_form_field_html_text">');
-                    var $content = $('<div class="o_readonly"/>').html(field.value);
-                    $div.append($content);
+                    var $iframe = $('<iframe class="o_readonly"/>');
+                    $iframe.on('load', function () {
+                        var $content = $($iframe.contents()[0]).find("body");
+                        $content.html(self._textToHtml(field.value));
+                        var height = $content[0] ? $content[0].scrollHeight - 16 : 0;
+                        $content.css('height', Math.max(30, Math.min(height, 500)) + 'px');
+                    });
+                    $div.append($iframe);
                     $td.append($div);
                     $tr.append($label, $td);
                     return $tr;
@@ -333,13 +335,23 @@ var FieldOmnaIntegrations = DebouncedField.extend({
                     var $label = $('<td class="o_td_label"><label class="o_form_label" for="'+ field.id +'">' + field.label + '</label></td>');
                     var $td = $('<td style="width: 100%;">');
                     var $div = $('<div id="'+ field.id +'" class="oe_form_field oe_form_field_html_text" data-integration="'+integration+'" name="'+ field.name +'">');
-                    var $textarea = $('<textarea>').val(field.value).hide();
+                    var $textarea = $('<textarea>');
                     $textarea.appendTo($div);
-                    var $wysiwyg = new Wysiwyg(this, this._getWysiwygOptions());
-                    var $content;
-                    $wysiwyg.attachTo($textarea).then(function () {
-                        $content = $wysiwyg.$editor.closest('body, odoo-wysiwyg-container');
-                    });
+                    $textarea.summernote(this._getSummernoteConfig());
+                    var $content = $div.find('.note-editable:first');
+                    $content.html(this._textToHtml(field.value));
+                    // trigger a mouseup to refresh the editor toolbar
+                    var mouseupEvent = $.Event('mouseup', {'setStyleInfoFromEditable': true});
+                    $content.trigger(mouseupEvent);
+                    transcoder.styleToClass($content);
+                    transcoder.imgToFont($content);
+                    transcoder.linkImgToAttachmentThumbnail($content);
+                    // reset the history (otherwise clicking on undo before editing the
+                    // value will empty the editor)
+                    var history = $content.data('NoteHistory');
+                    if (history) {
+                        history.reset();
+                    }
                     $td.append($div);
                     $tr.append($label, $td);
                     return $tr;
@@ -429,7 +441,11 @@ var FieldOmnaIntegrations = DebouncedField.extend({
 
     _renderMultiSelectTags: function(value){
         var elements = [];
-        var selected = value ? value.split(',') : [];
+        if (value.length > 0) {
+            var selected = value ? value.split(',') : [];
+        }else{
+            var selected = [];
+        }
         $.each(selected, function(index, element){
            elements.push({id: element, display_name: element});
         });
@@ -475,9 +491,6 @@ var FieldOmnaIntegrations = DebouncedField.extend({
 
     _textToHtml: function (text) {
         var value = text || "";
-        if (/%\send/.test(value)) { // is jinja
-            return value;
-        }
         try {
             $(text)[0].innerHTML; // crashes if text isn't html
         } catch (e) {
@@ -495,20 +508,13 @@ var FieldOmnaIntegrations = DebouncedField.extend({
         return value;
     },
 
-    _getWysiwygOptions: function () {
-        return Object.assign({}, this.nodeOptions, {
-            recordInfo: {
-                context: this.record.getContext(this.recordParams),
-                res_model: this.model,
-                res_id: this.res_id,
-            },
-            noAttachment: true,
-            inIframe: false,
-            snippets: false,
-
-            tabsize: 0,
+    _getSummernoteConfig: function () {
+        var summernoteConfig = {
+            model: this.model,
+            id: this.res_id,
+            focus: false,
             height: 180,
-            'toolbar': [
+            toolbar: [
                 ['style', ['style']],
                 ['font', ['bold', 'italic', 'underline', 'clear']],
                 ['fontsize', ['fontsize']],
@@ -516,13 +522,25 @@ var FieldOmnaIntegrations = DebouncedField.extend({
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],
                 ['insert', ['link']],
-                ['history', ['undo', 'redo']],
+                ['history', ['undo', 'redo']]
             ],
-        });
+            prettifyHtml: false,
+            styleWithSpan: false,
+            inlinemedia: ['p'],
+            lang: "odoo",
+            onChange: this._onChangeSummernote.bind(this),
+            disableDragAndDrop: true,
+        };
+
+        return summernoteConfig;
     },
 
     _getOptionsMultiSelect: function(field){
-        var selected = field.value ? field.value.split(',') : [];
+         if (field.value.length > 0) {
+            var selected = field.value ? field.value.split(',') : [];
+        }else{
+            var selected = [];
+        }
         var diff = [];
         $.each(field.options, function(index, el){
             if($.inArray(el, selected) == -1){
@@ -617,11 +635,13 @@ var FieldOmnaIntegrations = DebouncedField.extend({
         this.lastChangeEvent = event;
     },
 
-    _onChangeWysiwyg: function(ev){
-        var $field = $(ev.target.$target).closest('div.oe_form_field');
-        console.log($field);
-        this.updateData({id: $field.attr('name'), value: ev.target.getValue(), label: '', integration: $field.data('integration'), input_type: $field.data('input_type')});
-        this._doDebouncedAction.apply(this, arguments);
+    _onChangeSummernote: function($content, $editable){
+        var $field = $editable.closest('div.oe_form_field');
+        transcoder.attachmentThumbnailToLinkImg($editable);
+        transcoder.fontToImg($editable);
+        transcoder.classToStyle($editable);
+        this.updateData({id: $field.attr('name'), value: $editable.html(), label: '', integration: $field.data('integration'), input_type: $field.data('input_type')});
+        this._doDebouncedAction();
     },
 
     _onInput: function (event) {

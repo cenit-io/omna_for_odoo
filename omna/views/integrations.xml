@@ -19,8 +19,8 @@
             <field name="arch" type="xml">
                 <form string="Integrations">
                     <sheet>
-                        <field name="image_1920" widget='image' class="oe_avatar"
-                               options='{"zoom": true, "preview_image":"image_128"}'/>
+                        <field name="image" widget='image' class="oe_avatar"
+                               options='{"preview_image": "image_medium"}'/>
                         <div class="oe_title">
                             <label for="name" class="oe_edit_only"/>
                             <h1>
@@ -63,13 +63,13 @@
                             <div class="oe_kanban_global_click">
                                 <div class="oe_omna_kanban_integration_title d-flex b-white">
                                     <div class="">
-                                        <img t-att-src="kanban_image('omna.integration', 'image_128', record.id.raw_value)"
+                                        <img t-att-src="kanban_image('omna.integration', 'image_medium', record.id.raw_value)"
                                              alt="Integration" class="o_image_64_contain"/>
                                     </div>
                                     <div class="d-table-cell align-self-center">
-                                        <h3>
+                                        <h4>
                                             <field name="name" placeholder="Integration's Name"/>
-                                        </h3>
+                                        </h4>
                                         <span>
                                             <field name="channel"></field>
                                         </span>
@@ -79,19 +79,19 @@
                                     <div class="d-flex justify-content-end align-items-center">
                                         <t t-if="record.authorized.raw_value == true">
                                             <button type="object" name="unauthorize"
-                                                    class="btn btn-basic" string="Unauthorize">
+                                                    class="btn" string="Unauthorize">
                                                 <span style="font-size: 1.5rem" title="Unauthorize" aria-label="Unauthorize" class="fa fa-times-circle text-danger"
                                                       role="img"></span>
                                             </button>
                                         </t>
                                         <t t-else="">
                                             <button type="object" name="authorize"
-                                               class="btn btn-basic text-success" string="Authorize">
+                                               class="btn text-success" string="Authorize">
                                                 <span style="font-size: 1.5rem" title="Authorize" aria-label="Authorize" class="fa fa-check-circle"
                                                       role="img"></span>
                                             </button>
                                         </t>
-                                        <button type="object" name="unlink" class="btn btn-basic text-danger"
+                                        <button type="object" name="unlink" class="btn text-danger"
                                                 string="Delete">
                                             <span style="font-size: 1.5rem" title="Delete" aria-label="Delete" class="fa fa-trash" role="img"></span>
                                         </button>

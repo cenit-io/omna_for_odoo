@@ -17,14 +17,15 @@
             </field>
         </record>
 
-        <record model="ir.actions.act_window" id="action_import_resources_wzd">
-            <field name="binding_model_id" ref="omna.model_omna_integration"/>
-            <field name="name">Import Resources</field>
-            <field name="res_model">omna.import_resources_wzd</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-            <field name="binding_view_types">form</field>
-        </record>
+        <!-- Add action entry in the Action Menu for Product -->
+        <act_window id="action_import_resources_wzd"
+                    name="Import Resources"
+                    src_model="omna.integration"
+                    res_model="omna.import_resources_wzd"
+                    view_type="form"
+                    view_mode="form"
+                    key2="client_action_relate"
+                    target="new"/>
 
 
     </data>

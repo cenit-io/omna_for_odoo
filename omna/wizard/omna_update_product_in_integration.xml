@@ -1,0 +1,34 @@
+<odoo>
+    <data>
+        <record id="omna_update_product_in_integration_view" model="ir.ui.view">
+            <field name="name">omna.update.product.in.integration.form</field>
+            <field name="model">omna.update.product.in.integration</field>
+            <field name="arch" type="xml">
+                <form string="Update Product in a Integration">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="integration_id"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button string="Update Product" name="update_product"
+                                type="object" default_focus="1" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_update_product_in_integration"
+                    name="Update Product in a Integration"
+                    src_model="product.template"
+                    res_model="omna.update.product.in.integration"
+                    view_type="form"
+                    view_mode="form"
+                    key2="client_action_relate"
+                    target="new"/>
+
+    </data>
+</odoo>
