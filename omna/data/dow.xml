@@ -42,5 +42,5 @@
             <field name="title">Saturday</field>
             <field name="type">dow</field>
         </record>
-    </data>
+        </data>
 </odoo>

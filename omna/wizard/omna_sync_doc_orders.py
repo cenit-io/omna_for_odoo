@@ -2,6 +2,7 @@
 
 import logging
 from odoo import models, fields, api, exceptions
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -13,6 +14,7 @@ class OmnaSyncDocOrders(models.TransientModel):
     integration_id = fields.Many2one('omna.integration', 'Integration')
     number = fields.Char("Order Number")
     document_type = fields.Many2one('omna.doc.type', 'Document type', domain="[('sale_order.name', '=', number)]")
+    # document_type = fields.Many2one('omna.doc.type', 'Document type')
     flag = fields.Boolean(string='Flag', required=False)
 
 
@@ -25,6 +27,10 @@ class OmnaSyncDocOrders(models.TransientModel):
             orders_doc = []
             # https: // cenit.io / app / ecapi - v1 / integrations / {integration_id} / orders / {number} / doc / types
 
+            sale = self.env['sale.order'].search([('name', '=', self.number)])
+            if sale.state == 'cancel':
+                raise ValidationError(('Cannot import order documents in canceled status'))
+
             if self.integration_id:
                 response = self.get(
                     'integrations/%s/orders/%s/doc/types' % (
@@ -34,7 +40,6 @@ class OmnaSyncDocOrders(models.TransientModel):
                 # orders.append(data)
 
                 order_obj = self.env['omna.doc.type']
-                sale = self.env['sale.order'].search([('name', '=', self.number)])
                 for dt_order in orders:
                     act_doc_type = order_obj.search([('type', '=', dt_order.get('type')), ('sale_order', '=', sale.id)])
                     if not act_doc_type:
@@ -45,10 +50,6 @@ class OmnaSyncDocOrders(models.TransientModel):
                         }
                         act_doc_type = order_obj.with_context(synchronizing=True).create(data)
                 return {
-                    # 'type': 'ir.actions.client',
-                    # 'res_id': self.id,
-                    # 'tag': 'reload'
-
                     'name': 'Import doc of order',
                     'type': 'ir.actions.act_window',
                     'res_model': 'omna.sync_doc_orders_wizard',
@@ -62,9 +63,11 @@ class OmnaSyncDocOrders(models.TransientModel):
                 }
             else:
                 # https: // cenit.io / app / ecapi - v1 / orders / {order_id} / doc / {doc_type}
-                sale = self.env['sale.order'].search([('name', '=', self.number)])
+                # https: // cenit.io / app / ecapi - v1 / orders / {order_id}
                 response = self.get(
                     'orders/%s/doc/%s' % (sale.omna_id, self.document_type.type), {})
+                # response = self.get(
+                #     'orders/%s' % (sale.omna_id), {})
 
                 orders_doc = response.get('data')
 

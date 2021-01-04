@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="view_sync_variant_wizard" model="ir.ui.view">
             <field name="name">omna.sync.variant.wizard.form</field>
@@ -24,13 +24,14 @@
                                    'required': [('sync_type', '!=', 'all')]}"/>
 
                             <!--<field name="number" attrs="{'invisible': [('sync_type', '!=', 'number')],-->
-                                   <!--'required': [('sync_type', '=', 'number')]}"/>-->
+                            <!--'required': [('sync_type', '=', 'number')]}"/>-->
                             <!--<field name="external_id" invisible="1"/>-->
                             <!--<field name="external_variant_id" invisible="1"/>-->
                         </group>
                     </group>
                     <footer>
-                        <button string='Import Product Variants' name="sync_variants" type="object" class="btn-primary"/>
+                        <button string='Import Product Variants' name="sync_variants" type="object"
+                                class="btn-primary"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>
@@ -46,9 +47,9 @@
         </record>
 
         <menuitem id="menu_omna_sync_variant" name="Import Products Variants"
-                  parent="menu_omna_settings_alt" sequence="0"
+                  parent="menu_omna_settings_alt" sequence="4"
                   action="action_sync_variant_wizard"/>
 
 
-    </data>
+
 </odoo>

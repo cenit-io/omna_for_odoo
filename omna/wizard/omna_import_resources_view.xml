@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
         <record id="view_import_resources_wzd" model="ir.ui.view">
             <field name="name">omna.import.resources.wzd.form</field>
             <field name="model">omna.import_resources_wzd</field>
@@ -18,15 +18,26 @@
         </record>
 
         <!-- Add action entry in the Action Menu for Product -->
-        <act_window id="action_import_resources_wzd"
-                    name="Import Resources"
-                    src_model="omna.integration"
-                    res_model="omna.import_resources_wzd"
-                    view_type="form"
-                    view_mode="form"
-                    key2="client_action_relate"
-                    target="new"/>
+<!--        <record id="action_import_resources_wzd"-->
+<!--                name="Import Resources"-->
+<!--                src_model="omna.integration"-->
+<!--                res_model="omna.import_resources_wzd"-->
+<!--                view_type="form"-->
+<!--                view_mode="form"-->
+<!--                key2="client_action_relate"-->
+<!--                target="new"-->
+<!--                model="ir.actions.act_window"/>-->
 
 
-    </data>
+        <record id="action_import_resources_wzd" model="ir.actions.act_window">
+            <field name="name">Import Resources</field>
+            <field name="res_model">omna.import_resources_wzd</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_import_resources_wzd"/>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_omna_integration"/>
+            <field name="binding_view_types">form</field>
+        </record>
+
+
 </odoo>

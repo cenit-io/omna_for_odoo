@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
         <record id="omna_tenant_tree_view" model="ir.ui.view">
             <field name="name">omna.tenant.tree</field>
             <field name="model">omna.tenant</field>
@@ -41,16 +41,17 @@
                 </form>
             </field>
         </record>
-<!--            arreglar para odoo14-->
-<!--        <record id="omna_tenant_search_view" model="ir.ui.view">-->
-<!--            <field name="name">omna.tenant.search</field>-->
-<!--            <field name="model">omna.tenant</field>-->
-<!--            <field name="arch" type="xml">-->
-<!--                <search string="Tenant">-->
-<!--                    <filter name="current" string="Current" store="True" domain="[('current', '=', True)]"/>-->
-<!--                </search>-->
-<!--            </field>-->
-<!--        </record>-->
+
+        <record id="omna_tenant_search_view" model="ir.ui.view">
+            <field name="name">omna.tenant.search</field>
+            <field name="model">omna.tenant</field>
+            <field name="arch" type="xml">
+                <search string="Tenant">
+                    <field name="name"/>
+                    <filter name="current" string="Current" domain="[('current', '=', True)]"/>
+                </search>
+            </field>
+        </record>
 
         <record id="action_omna_tenant" model="ir.actions.act_window">
             <field name="name">Tenants</field>
@@ -62,5 +63,5 @@
         <menuitem id="menu_omna_tenants" name="Tenants" parent="menu_omna_system" sequence="0"
                   action="action_omna_tenant"/>
 
-    </data>
+
 </odoo>

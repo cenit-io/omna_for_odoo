@@ -72,5 +72,5 @@
             <field name="title">December</field>
             <field name="type">moy</field>
         </record>
-    </data>
+        </data>
 </odoo>

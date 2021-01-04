@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
         <record id="view_export_orders_from_integration_wzd" model="ir.ui.view">
             <field name="name">omna.export_orders_from_integration_wzd.form</field>
             <field name="model">omna.export_orders_from_integration_wzd</field>
             <field name="arch" type="xml">
                 <form string="Export Orders">
-                   <group>
+                    <group>
                         <!--You can import all orders or from a specific integration.-->
                         <div>
                             Wizard to export the updated orders of
@@ -38,8 +38,8 @@
         </record>
 
         <menuitem id="menu_omna_export_orders_from_integration_wzd" name="Export Orders"
-                  parent="menu_omna_settings_alt" sequence="0"
+                  parent="menu_omna_settings_alt" sequence="8"
                   action="action_export_orders_from_integration_wzd"/>
 
-    </data>
+
 </odoo>

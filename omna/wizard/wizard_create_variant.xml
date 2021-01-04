@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
         <record id="wizard_create_variant_view" model="ir.ui.view">
             <field name="name">wizard.create.variant.form</field>
             <field name="model">wizard.create.variant</field>
@@ -32,11 +33,23 @@
             </field>
         </record>
 
-        <act_window id="wizard_create_variant"
-            multi="True"
-            key2="client_action_multi" name="Create New Variant"
-            res_model="wizard.create.variant" src_model="product.template"
-            view_mode="form" target="new" view_type="form" />
+<!--        <record id="wizard_create_variant"-->
+<!--                multi="True"-->
+<!--                key2="client_action_multi" name="Create New Variant"-->
+<!--                res_model="wizard.create.variant" src_model="product.template"-->
+<!--                view_mode="form" target="new" view_type="form" model="ir.actions.act_window"/>-->
 
-    </data>
+
+        <record id="wizard_create_variant" model="ir.actions.act_window">
+            <field name="name">Create New Variant</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">wizard.create.variant</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="wizard_create_variant_view"/>
+            <!-- TODO: check if we need this -->
+            <field name="binding_model_id" ref="product.model_product_template" />
+            <field name="binding_view_types">list</field>
+        </record>
+
 </odoo>

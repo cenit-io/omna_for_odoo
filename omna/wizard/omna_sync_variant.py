@@ -8,7 +8,6 @@ from datetime import datetime, timezone, time
 from odoo.exceptions import ValidationError
 from odoo import models, api, exceptions, fields
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -59,8 +58,9 @@ class OmnaSyncVariant(models.TransientModel):
             if self.sync_type != 'by_external_id':
                 while flag:
                     if self.sync_type == 'all':
-                        response = self.get('integrations/%s/products/%s/variants' % (self.integration_id.integration_id,
-                                                                                      ext_id), {'limit': limit, 'offset': offset})
+                        response = self.get(
+                            'integrations/%s/products/%s/variants' % (self.integration_id.integration_id,
+                                                                      ext_id), {'limit': limit, 'offset': offset})
 
                     data = response.get('data')
                     products.extend(data)
@@ -78,12 +78,15 @@ class OmnaSyncVariant(models.TransientModel):
                     #     ('integration_id', '=', self.integration_id.id)], limit=1)
                     if extermal and ext_id:
                         response = self.get(
-                            'integrations/%s/products/%s/variants/%s' % (self.integration_id.integration_id, ext_id, extermal.id_external,
-                                                                         ),
+                            'integrations/%s/products/%s/variants/%s' % (
+                            self.integration_id.integration_id, ext_id, extermal.id_external,
+                            ),
                             {})
                     else:
-                        raise ValidationError(('The product %s, with the variant %s, was not found in integration %s') % (
-                            self.template_id.name, self.variant_id.display_name, self.integration_id.integration_id))
+                        raise ValidationError(
+                            ('The product %s, with the variant %s, was not found in integration %s') % (
+                                self.template_id.name, self.variant_id.display_name,
+                                self.integration_id.integration_id))
 
                 # else:
                 #     response = self.get(
@@ -92,12 +95,12 @@ class OmnaSyncVariant(models.TransientModel):
                 data = response.get('data')
                 products.append(data)
 
-
         product_obj = self.env['product.product']
         product_template_obj = self.env['product.template']
         for product in products:
             act_product = product_obj.search([('omna_variant_id', '=', product.get('id'))])
-            act_product_template = product_template_obj.search([('omna_product_id', '=', product.get('product').get('id'))])
+            act_product_template = product_template_obj.search(
+                [('omna_product_id', '=', product.get('product').get('id'))])
             if act_product_template:
                 if act_product:
                     data = {
@@ -116,27 +119,21 @@ class OmnaSyncVariant(models.TransientModel):
                             image = base64.b64encode(requests.get(url.strip()).content).replace(b'\n', b'')
                             data['image_variant'] = image
 
-                    # if len(product.get('category')):
-                    #     category_id = product.get('category')
-                    #     if category_id:
-                    #         cat = self.env['product.category'].search([('omna_category_id', '=', category_id)], limit=1)
-                    #         data['categ_id'] = cat.id
-                    #
-                    # if len(product.get('brand')):
-                    #     brand_id = product.get('brand')
-                    #     if brand_id:
-                    #         brand = self.env['product.brand'].search([('omna_brand_id', '=', brand_id)], limit=1)
-                    #         data['brand_id'] = brand.id
-
-                    if len(product.get('integrations')):
-                        # me da error el len este de arriba porque es integration sin la 's '
+                    if len(product.get('integration')):
                         integrations = []
-                        for integration in product.get('integrations'):
-                            integrations.append(integration.get('id'))
+                        data_external = []
+                        list_category = []
+                        list_brand = []
+                        integration = product.get('integration')
+                        integrations.append(product.get('integration').get('id'))
 
-                            category_or_brands = integration.get('product').get('properties')
-                            integration_id = self.env['omna.integration'].search(
-                                [('integration_id', '=', integration.get('id'))])
+                        data['external_id_integration_ids'] = [(0, 0, {'integration_id': integration.get('id'),
+                                                                       'id_external': integration.get(
+                                                                           'variant').get('remote_product_id')})]
+                        category_or_brands = integration.get('variant').get('properties')
+                        integration_id = self.env['omna.integration'].search(
+                            [('integration_id', '=', integration.get('id'))])
+                        if category_or_brands:
                             for cat_br in category_or_brands:
                                 if (cat_br.get('label') == 'Category') and (cat_br.get('options')):
                                     category_id = cat_br.get('options')[0]['id']
@@ -169,6 +166,7 @@ class OmnaSyncVariant(models.TransientModel):
 
                         ids = self.env['omna.integration'].search([('integration_id', 'in', integrations)]).ids
                         data['variant_integration_ids'] = [(6, 0, ids)]
+                        # data['external_id_integration_ids'] = [(6, 0, data_external)]
 
                     act_product.with_context(synchronizing=True).write(data)
                 else:
@@ -189,31 +187,21 @@ class OmnaSyncVariant(models.TransientModel):
                             image = base64.b64encode(requests.get(url.strip()).content).replace(b'\n', b'')
                             data['image_variant'] = image
 
-                    # if len(product.get('category')):
-                    #     category_id = product.get('category')
-                    #     if category_id:
-                    #         cat = self.env['product.category'].search([('omna_category_id', '=', category_id)], limit=1)
-                    #         data['categ_id'] = cat.id
-                    #
-                    # if len(product.get('brand')):
-                    #     brand_id = product.get('brand')
-                    #     if brand_id:
-                    #         brand = self.env['product.brand'].search([('omna_brand_id', '=', brand_id)], limit=1)
-                    #         data['brand_id'] = brand.id
-
-                    if len(product.get('integrations')):
+                    if len(product.get('integration')):
                         integrations = []
                         data_external = []
                         list_category = []
                         list_brand = []
-                        for integration in product.get('integrations'):
-                            integrations.append(integration.get('id'))
-                            data['external_id_integration_ids'] = [(0, 0, {'integration_id': integration.get('id'),
-                                                                           'id_external': integration.get(
-                                                                               'product').get('remote_product_id')})]
-                            category_or_brands = integration.get('product').get('properties')
-                            integration_id = self.env['omna.integration'].search(
-                                [('integration_id', '=', integration.get('id'))])
+                        integration = product.get('integration')
+                        integrations.append(product.get('integration').get('id'))
+
+                        data['external_id_integration_ids'] = [(0, 0, {'integration_id': integration.get('id'),
+                                                                       'id_external': integration.get(
+                                                                           'variant').get('remote_product_id')})]
+                        category_or_brands = integration.get('variant').get('properties')
+                        integration_id = self.env['omna.integration'].search(
+                            [('integration_id', '=', integration.get('id'))])
+                        if category_or_brands:
                             for cat_br in category_or_brands:
                                 if (cat_br.get('label') == 'Category') and (cat_br.get('options')):
                                     category_id = cat_br.get('options')[0]['id']

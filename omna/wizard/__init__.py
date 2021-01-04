@@ -21,4 +21,7 @@ from . import omna_sync_categories
 from . import omna_sync_brands
 from . import omna_export_orders_from_integration
 from . import omna_sync_doc_orders
+from . import properties_list_values
+from . import link_variant_wizard
+from . import properties_list_variant_wizard
 

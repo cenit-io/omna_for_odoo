@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="view_sync_orders_wizard" model="ir.ui.view">
             <field name="name">omna.sync.orders.wizard.form</field>
@@ -44,9 +44,7 @@
         </record>
 
         <menuitem id="menu_omna_sync_orders" name="Import Orders"
-                  parent="menu_omna_settings_alt" sequence="0"
+                  parent="menu_omna_settings_alt" sequence="10"
                   action="action_sync_orders_wizard"/>
 
-
-    </data>
 </odoo>

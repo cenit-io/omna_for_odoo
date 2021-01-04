@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
         <record id="omna_task_tree_view" model="ir.ui.view">
             <field name="name">omna.task.tree</field>
             <field name="model">omna.task</field>
@@ -76,5 +76,5 @@
         <menuitem id="menu_omna_my_tasks" name="Tasks" parent="menu_omna_system" sequence="0"
                   action="action_omna_task"/>
 
-    </data>
+
 </odoo>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="omna_flow_tree_view" model="ir.ui.view">
             <field name="name">omna.flow.tree</field>
@@ -65,5 +65,5 @@
         <menuitem id="menu_omna_flows" name="Workflows" parent="menu_omna_system"
                   sequence="0" action="action_omna_flow"/>
 
-    </data>
+
 </odoo>

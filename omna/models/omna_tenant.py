@@ -27,7 +27,7 @@ class OmnaTenant(models.Model):
         for record in self:
             record.current = self.env.user.context_omna_current_tenant.id == record.id
 
-    current = fields.Boolean('Current Tenant', default=False, invisible=True, compute=_compute_current)
+    current = fields.Boolean('Current Tenant', default=False, invisible=True, compute=_compute_current, store=True)
 
     @api.model
     def create(self, vals_list):

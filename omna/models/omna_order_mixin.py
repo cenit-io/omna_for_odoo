@@ -85,13 +85,17 @@ class OmnaOrderMixin(models.AbstractModel):
                             [('integration_id', '=', order.get('integration').get('id'))], limit=1)
 
                         if integration:
+                            status=''
+                            if order.get('status') == 'CANCELLED':
+                                status='cancel'
                             # Creating the order
                             data = {
                                 'omna_id': order.get('id'),
                                 'integration_id': integration.id,
                                 'name': order.get('number'),
                                 'origin': 'OMNA',
-                                'state': 'draft',
+                                # 'state': 'draft',
+                                'state': status,
                                 'date_order': parse(order.get('last_import_date').split('T')[0]),
                                 'create_date': datetime.now(timezone.utc),
                                 'partner_id': partner_invoice.id,

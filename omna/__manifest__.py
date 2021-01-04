@@ -31,8 +31,8 @@
         'views/tenants.xml',
         'views/collections.xml',
         'views/omna_templates.xml',
-        # arreglar para odoo14
-        # 'views/dashboard.xml',
+        'views/dashboard.xml',
+        'views/integration_fields.xml',
         # wizard
         'wizard/omna_sync_products_view.xml',
         'wizard/omna_sync_variant_view.xml',
@@ -45,20 +45,19 @@
         'wizard/omna_sync_collections_view.xml',
         #'wizard/omna_publish_product_view.xml',
         #'wizard/omna_unpublish_product_view.xml',
-
-
-        # arreglar odoo14
-        # 'wizard/omna_export_order_view.xml',
+        'wizard/omna_export_order_view.xml',
 	    'wizard/omna_export_orders_from_integration_view.xml',
-        # arreglar odoo14
-        # 'wizard/omna_reimport_order_view.xml',
-        # 'wizard/omna_import_resources_view.xml',
-        # 'wizard/omna_update_product_in_integration.xml',
-        # 'wizard/omna_update_variant_in_integration.xml',
-        # 'wizard/wizard_create_variant.xml',
+        'wizard/omna_reimport_order_view.xml',
+        'wizard/omna_import_resources_view.xml',
+        'wizard/omna_update_product_in_integration.xml',
+        'wizard/omna_update_variant_in_integration.xml',
+        'wizard/wizard_create_variant.xml',
         'wizard/omna_sync_categories_view.xml',
         'wizard/omna_sync_brands_view.xml',
         'wizard/omna_sync_doc_orders_view.xml',
+        'wizard/properties_list_values_view.xml',
+        'wizard/link_variant_wizard_view.xml',
+        'wizard/properties_list_variant_wizard_view.xml',
 
 
         # initial data

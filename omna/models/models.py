@@ -6,6 +6,7 @@ from odoo import models, fields, api, exceptions, tools, _
 from odoo.exceptions import UserError
 from odoo.tools.image import image_data_uri
 from odoo.tools import float_compare, pycompat
+from odoo.tools import ImageProcess
 import dateutil.parser
 import werkzeug
 import pytz
@@ -15,6 +16,7 @@ import base64
 import logging
 
 _logger = logging.getLogger(__name__)
+
 
 def omna_id2real_id(omna_id):
     if omna_id and isinstance(omna_id, str) and len(omna_id.split('-')) == 2:
@@ -95,7 +97,15 @@ class OmnaIntegration(models.Model):
                     image = base64.b64encode(res).replace(b'\n', b'')
                     vals_list['image'] = image
 
-        tools.image_resize_images(vals_list)
+        image = ImageProcess(vals_list['image'])
+        # w, h = image.image.size
+        # square_size = w if w > h else h
+        # image.crop_resize(square_size, square_size)
+        # image.image = image.image.resize((1024, 1024))
+        # image.operationsCount += 1
+        vals_list['image'] = image.image_base64(output_format='PNG')
+
+        # tools.image_resize_images(vals_list)
 
         if not self._context.get('synchronizing'):
             self.check_access_rights('create')
@@ -113,7 +123,6 @@ class OmnaIntegration(models.Model):
         else:
             return super(OmnaIntegration, self).create(vals_list)
 
-    # @api.multi
     def write(self, vals):
         if 'image' not in vals:
             logo = self._get_logo(vals['channel'])
@@ -123,7 +132,17 @@ class OmnaIntegration(models.Model):
                 if res:
                     image = base64.b64encode(res).replace(b'\n', b'')
                     vals['image'] = image
-        tools.image_resize_images(vals)
+
+        image = ImageProcess(vals['image'])
+        # w, h = image.image.size
+        # square_size = w if w > h else h
+        # image.crop_resize(square_size, square_size)
+        image.image = image.image.resize((1024, 1024))
+        # image.operationsCount += 1
+        vals['image'] = image.image_base64(output_format='PNG')
+
+        # tools.image_resize_images(vals)
+
         return super(OmnaIntegration, self).write(vals)
 
     def unlink(self):
@@ -398,53 +417,138 @@ class OmnaIntegrationProduct(models.Model):
     _name = 'omna.integration_product'
     _inherit = 'omna.api'
 
-    product_template_id = fields.Many2one('product.template', 'Product', required=True, ondelete='cascade')
-    integration_ids = fields.Many2many('omna.integration', 'omna_integration_integration_rel', 'integration_product_id',
-                                               'integration_id', 'OMNA Integrations', required=True)
+
+    def _get_product_template_id(self):
+        return self.env.context.get('default_product_template_id', False)
+
+
+    product_template_id = fields.Many2one('product.template', 'Product', required=True, ondelete='cascade', default=lambda self: self.env.context.get('default_product_template_id', False))
+    # product_template_id = fields.Many2one('product.template', 'Product', required=True, ondelete='cascade', default=lambda self: self._get_product_template_id())
+    # integration_ids = fields.Many2many('omna.integration', 'omna_integration_integration_rel', 'integration_product_id',
+    #                                    'integration_id', 'OMNA Integrations', required=True)
+    integration_ids = fields.Many2one('omna.integration', 'OMNA Integration', required=True)
     link_with_its_variants = fields.Selection([
         ('NONE', 'NONE'),
         ('SELECTED', 'SELECTED'),
         ('NEW', 'NEW'),
-        ('ALL', 'ALL')], default='NONE', required=True)
-    delete_from_integration = fields.Boolean("Delete from Integration", default=False, help="Set whether the product should be removed from the remote integration source.")
-
+        ('ALL', 'ALL')], default='ALL', required=True)
+    delete_from_integration = fields.Boolean("Delete from Integration", default=False,
+                                             help="Set whether the product should be removed from the remote integration source.")
 
     @api.model
     def create(self, vals_list):
         res = super(OmnaIntegrationProduct, self).create(vals_list)
-        try:
-            integrations = [integration.integration_id for integration in res.integration_ids]
-            data = {
-                'data': {
-                    'integration_ids': integrations,
-                    'link_with_its_variants': res.link_with_its_variants
-                }
-            }
-            self.put('products/%s' % res.product_template_id.omna_product_id, data)
-            return res
-        except Exception:
-            raise exceptions.AccessError(_("Error trying to update products in Omna's API."))
-
+        # try:
+        #     # integrations = [integration.integration_id for integration in res.integration_ids]
+        #     integrations = [res.integration_ids.integration_id]
+        #     data = {
+        #         'data': {
+        #             'integration_ids': integrations,
+        #             'link_with_its_variants': res.link_with_its_variants
+        #         }
+        #     }
+        #     self.put('products/%s' % res.product_template_id.omna_product_id, data)
+        #     # https: // cenit.io / app / ecapi - v1 / products / {product_id}
+        #     # response = self.get('products/%s' % res.product_template_id.omna_product_id)
+        #     # print(response)
+        #     # llamar al endpoint https://doc-api.omna.io/api-spec/#operation/get_product_beta_
+        #
+        return res
+        # except Exception:
+        #     raise exceptions.AccessError(_("Error trying to update products in Omna's API."))
 
     # @api.multi
     # def write(self, vals):
     #     return super(OmnaIntegrationProduct, self).write(vals)
 
-
-    # @api.multi
     def unlink(self):
-        try:
-            for intg_product in self:
-                integrations = [integration.integration_id for integration in intg_product.integration_ids]
-                data = {
-                    'data': {
-                        'integration_ids': integrations,
-                        'delete_from_integration': intg_product.delete_from_integration
-                    }
-                }
-                self.patch('products/%s' % intg_product.product_template_id.omna_product_id, data)
+        return super(OmnaIntegrationProduct, self).unlink()
+        # try:
+        #     for intg_product in self:
+        #         # integrations = [integration.integration_id for integration in intg_product.integration_ids]
+        #         integrations = [intg_product.integration_ids.integration_id]
+        #         data = {
+        #             'data': {
+        #                 'integration_ids': integrations,
+        #                 'delete_from_integration': intg_product.delete_from_integration
+        #             }
+        #         }
+        #         self.patch('products/%s' % intg_product.product_template_id.omna_product_id, data)
+        #
+        #     return super(OmnaIntegrationProduct, self).unlink()
+        # except Exception:
+        #     raise exceptions.AccessError(_("Error trying to update products in Omna's API."))
 
-            return super(OmnaIntegrationProduct, self).unlink()
+
+    def launch_wizard_list(self):
+        view_id = self.env.ref('omna.view_properties_values_wizard').id
+        context = dict(
+            self.env.context,
+            integration_id=self.integration_ids.id,
+            integration_product_id=self.id,
+        )
+
+        return {
+            'name': 'Property List By Integrations',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'properties.values.wizard',
+            'view_id': view_id,
+            'views': [(view_id, 'form')],
+            'target': 'new',
+            'context': context,
+        }
+
+    def action_link(self):
+        try:
+            # integrations = [integration.integration_id for integration in res.integration_ids]
+            integrations = [self.integration_ids.integration_id]
+            data = {
+                'data': {
+                    'integration_ids': integrations,
+                    'link_with_its_variants': self.link_with_its_variants
+                }
+            }
+
+            response = self.put('products/%s' % self.product_template_id.omna_product_id, data)
+
+            # external_id_integration_ids
+
+            new_external = self.env['omna.template.integration.external.id'].create(
+                {'integration_id': self.integration_ids.integration_id,
+                 'id_external': self.product_template_id.omna_product_id})
+            self.env.cr.commit()
+            # vals_list['external_id_integration_ids'] = [(6, 0, data_external)]
+            self.product_template_id.write({'external_id_integration_ids': [(4, new_external.id)]})
+            # self.env.cr.commit()
+
+            return self
+        except Exception:
+            raise exceptions.AccessError(_("Error trying to update products in Omna's API."))
+
+
+
+    def action_unlink(self):
+        try:
+            # integrations = [integration.integration_id for integration in res.integration_ids]
+            temp_obj = self.env['omna.template.integration.external.id']
+            integrations = [self.integration_ids.integration_id]
+            data = {
+                'data': {
+                    'integration_ids': integrations,
+                    'delete_from_integration': self.delete_from_integration
+                }
+            }
+
+            response = self.patch('products/%s' % self.product_template_id.omna_product_id, data)
+
+            aux = temp_obj.search([('integration_id', '=', self.integration_ids.integration_id), ('product_template_id', '=', self.product_template_id.omna_product_id)])
+
+            self.product_template_id.write({'integration_ids': [(2, self.id)],
+                                            'external_id_integration_ids': [(2, aux.id)]})
+            self.env.cr.commit()
+
+            return self
         except Exception:
             raise exceptions.AccessError(_("Error trying to update products in Omna's API."))
 
@@ -488,14 +592,13 @@ class ProductTemplate(models.Model):
     integration_ids = fields.One2many('omna.integration_product', 'product_template_id', 'Integrations')
     integrations_data = fields.Char('Integrations data')
     no_create_variants = fields.Boolean('Do not create variants automatically', default=True)
-    external_id_integration_ids = fields.One2many('omna.template.integration.external.id', 'product_template_id', string='External Id by Integration')
+    external_id_integration_ids = fields.One2many('omna.template.integration.external.id', 'product_template_id',
+                                                  string='External Id by Integration')
     # variant_external_id_integration_ids = fields.One2many('omna.variant.integration.external.id', 'product_variant_id',
     #                                               string='External Id by Integration')
 
     brand_ids = fields.Many2many('product.brand', string='Brand')
     category_ids = fields.Many2many('product.category', string='Category')
-
-
 
     def _create_variant_ids(self):
         if not self.no_create_variants:
@@ -525,8 +628,9 @@ class ProductTemplate(models.Model):
                 list_brand = []
                 for integration in product.get('integrations'):
                     integrations.append(integration.get('id'))
-                    new_external = self.env['omna.template.integration.external.id'].create({'integration_id': integration.get('id'),
-                                            'id_external': integration.get('product').get('remote_product_id')})
+                    new_external = self.env['omna.template.integration.external.id'].create(
+                        {'integration_id': integration.get('id'),
+                         'id_external': integration.get('product').get('remote_product_id')})
                     data_external.append(new_external.id)
 
                     integration_id = self.env['omna.integration'].search(
@@ -572,7 +676,6 @@ class ProductTemplate(models.Model):
         else:
             return super(ProductTemplate, self).create(vals_list)
 
-    # @api.multi
     def write(self, vals):
         if not self._context.get('synchronizing'):
             for record in self:
@@ -628,16 +731,19 @@ class ProductTemplate(models.Model):
                                                 {'name': brand_name, 'omna_brand_id': brand_id})
                                         else:
                                             brands = self.env['product.brand'].create(
-                                                {'name': brand_name, 'omna_brand_id': brand_id, 'integration_id': integration_id.id})
+                                                {'name': brand_name, 'omna_brand_id': brand_id,
+                                                 'integration_id': integration_id.id})
                                         list_brand.append(brands.id)
 
-                                    integration_data['properties'].append({'id': field['id'], 'value': field['value'], 'label': field['label']})
+                                    integration_data['properties'].append(
+                                        {'id': field['id'], 'value': field['value'], 'label': field['label']})
 
                                 vals['category_ids'] = [(6, 0, list_category)]
                                 vals['brand_ids'] = [(6, 0, list_brand)]
 
                                 response = self.post(
-                                    'integrations/%s/products/%s' % (integration['id'], integration['product']['remote_product_id']),
+                                    'integrations/%s/products/%s' % (
+                                    integration['id'], integration['product']['remote_product_id']),
                                     {'data': integration_data})
                                 if not response.get('data').get('id'):
                                     raise exceptions.AccessError(
@@ -661,8 +767,11 @@ class ProductTemplate(models.Model):
         return super(ProductTemplate, self).unlink()
 
     def action_create_variant(self):
+        self.ensure_one()
         integrations = self.external_id_integration_ids.mapped('integration_id')
-        omna_integrations = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
+
+        # omna_integrations = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
+        omna_integrations = self.integration_ids.mapped('integration_ids')
 
         return {
             'name': _('Create Variant'),
@@ -722,7 +831,6 @@ class ProductProduct(models.Model):
     category_ids = fields.Many2many('product.category', string='Category')
     quantity = fields.Integer('Quantity')
 
-
     # TODO Publish variant in OMNA when supported
     # @api.model
     # def create(self, vals_list):
@@ -770,8 +878,6 @@ class ProductProduct(models.Model):
     #     else:
     #         return super(ProductProduct, self).create(vals_list)
 
-
-    # @api.multi
     def write(self, vals):
         if not self._context.get('synchronizing'):
             for record in self:
@@ -832,6 +938,48 @@ class ProductProduct(models.Model):
         return super(ProductProduct, self).unlink()
 
 
+
+    def launch_wizard_link(self):
+        view_id = self.env.ref('omna.view_link_variant_wizard').id
+        context = dict(
+            self.env.context,
+            # integration_id=self.integration_ids.id,
+            # integration_product_id=self.id,
+        )
+
+        return {
+            'name': 'Link Product Variant with Integration',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'link.variant.wizard',
+            'view_id': view_id,
+            'views': [(view_id, 'form')],
+            'target': 'new',
+            'context': context,
+        }
+
+
+
+    def launch_wizard_properties_list(self):
+        view_id = self.env.ref('omna.view_properties_list_variant_wizard').id
+        context = dict(
+            self.env.context,
+            # integration_id=self.integration_ids.id,
+            # integration_product_id=self.id,
+        )
+
+        return {
+            'name': 'Property List By Integrations',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'properties.list.variant.wizard',
+            'view_id': view_id,
+            'views': [(view_id, 'form')],
+            'target': 'new',
+            'context': context,
+        }
+
+
 class SaleOrder(models.Model):
     _name = 'sale.order'
     _inherit = ['sale.order', 'omna.api']
@@ -865,7 +1013,6 @@ class SaleOrder(models.Model):
 
         return True
 
-    # @api.multi
     def action_cancel_from_integration(self):
         for order in self.filtered(lambda x: x.origin == 'OMNA'):
             response = self.delete('integrations/%s/orders/%s' %
@@ -878,7 +1025,6 @@ class SaleOrder(models.Model):
                                              _("Information"), True)
                 order.write({'state': 'cancel'})
 
-    # @api.multi
     def retrieve_order(self):
         try:
             orders = []
@@ -1189,30 +1335,27 @@ class ProductCategory(models.Model):
         else:
             return None
 
-
     omna_tenant_id = fields.Many2one('omna.tenant', 'Tenant', default=_current_tenant)
     omna_category_id = fields.Char("Category identifier in OMNA", index=True)
     integration_id = fields.Many2one('omna.integration', 'OMNA Integration')
     integration_category_name = fields.Char(related='integration_id.name', readonly=False, store=True)
-    product_count_cat= fields.Integer('# Products', compute='_compute_product_count_cat')
+    product_count_cat = fields.Integer('# Products', compute='_compute_product_count_cat')
     product_category_ids = fields.Many2many(
         comodel_name='product.template',
         string='Product')
 
-    # @api.multi
     def _compute_product_count_cat(self):
         for category in self:
             category.product_count_cat = self.env['product.template'].search_count(
                 [('category_ids', 'in', category.id)])
 
-    # @api.multi
     def view_product_category(self):
         self.ensure_one()
         return {
             'name': 'Product',
             'type': 'ir.actions.act_window',
             'res_model': 'product.template',
-            'view_mode':'kanban,tree,form,activity',
+            'view_mode': 'kanban,tree,form,activity',
             'domain': [('id', 'in', self.product_category_ids.ids)]
 
         }
@@ -1242,13 +1385,11 @@ class ProductBrand(models.Model):
         comodel_name='product.template',
         string='Product')
 
-    # @api.multi
     def _compute_product_count_br(self):
         for brand in self:
             brand.product_count_br = self.env['product.template'].search_count(
                 [('brand_ids', 'in', brand.id)])
 
-    # @api.multi
     def view_product_brand(self):
         self.ensure_one()
         return {
@@ -1260,3 +1401,7 @@ class ProductBrand(models.Model):
 
         }
 
+class ProductAttributeValue(models.Model):
+    _inherit = "product.attribute.value"
+
+    name = fields.Char(string='Value', required=False, translate=True)

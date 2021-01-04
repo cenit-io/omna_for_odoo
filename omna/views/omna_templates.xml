@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <template id="assets_backend" name="mail assets" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
-                <link rel="stylesheet" href="/omna/static/src/less/omna_integrations_kanban.less"/>
+                <!--                <link rel="stylesheet" href="/omna/static/src/less/omna_integrations_kanban.less"/>-->
+                <link rel="stylesheet" href="/omna/static/src/css/omna_integrations_kanban.css"/>
                 <!-- systray -->
                 <script type="text/javascript" src="/omna/static/src/js/omna_sign_in.js"></script>
                 <script type="text/javascript" src="/omna/static/src/js/systray_tenant_menu.js"></script>
                 <!-- notifications-->
                 <script type="text/javascript" src="/omna/static/src/js/web_client.js"/>
                 <script type="text/javascript" src="/omna/static/src/js/widgets/notification.js"/>
-<!--                Fields-->
+                <!--                Fields-->
                 <script type="text/javascript" src="/omna/static/src/js/fields/omna_basic_fields.js"/>
                 <script type="text/javascript" src="/omna/static/src/js/fields/omna_field_registry.js"/>
             </xpath>
@@ -21,5 +22,5 @@
             </link>
         </template>
 
-    </data>
+
 </odoo>

@@ -8,7 +8,6 @@ from datetime import datetime, timezone, time
 from odoo.exceptions import ValidationError
 from odoo import models, api, exceptions, fields
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -92,7 +91,7 @@ class OmnaSyncProducts(models.TransientModel):
                     url = product.get('images')[0]
                     if url:
                         image = base64.b64encode(requests.get(url.strip()).content).replace(b'\n', b'')
-                        data['image'] = image
+                        data['image_1920'] = image
 
                 if self.sync_type in ['by_external_id', 'by_integration']:
                     if len(product.get('integration')):
@@ -135,10 +134,11 @@ class OmnaSyncProducts(models.TransientModel):
 
                         omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
                         for integration in omna_integration:
-                            data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
+                            # data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
+                            data['integration_ids'] = [(0, 0, {'integration_ids': integration.id})]
 
                 else:
-                    if len(product.get('integrations')):
+                    if len(product.get('integrations', [])):
                         integrations = []
                         list_category = []
                         list_brand = []
@@ -178,7 +178,8 @@ class OmnaSyncProducts(models.TransientModel):
                         omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
                         for integration in omna_integration:
                             # revisar aca porque me esta repitiendo la integracion, cuando no deberia ser
-                            data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
+                            # data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
+                            data['integration_ids'] = [(1, 0, {'integration_ids': integration.id})]
 
                 act_product.with_context(synchronizing=True).write(data)
                 try:
@@ -197,9 +198,9 @@ class OmnaSyncProducts(models.TransientModel):
                     url = product.get('images')[0]
                     if url:
                         image = base64.b64encode(requests.get(url.strip()).content).replace(b'\n', b'')
-                        data['image'] = image
+                        data['image_1920'] = image
 
-                if len(product.get('integrations')):
+                if len(product.get('integrations', [])):
                     integrations = []
                     list_category = []
                     list_brand = []
@@ -245,7 +246,8 @@ class OmnaSyncProducts(models.TransientModel):
 
                     omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
                     for integration in omna_integration:
-                        data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
+                        # data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
+                        data['integration_ids'] = [(0, 0, {'integration_ids': integration.id})]
                     # data['external_id_integration_ids'] = [(6, 0, data_external)]
 
                 act_product = product_obj.with_context(synchronizing=True).create(data)
@@ -296,9 +298,9 @@ class OmnaSyncProducts(models.TransientModel):
                     url = product.get('images')[0]
                     if url:
                         image = base64.b64encode(requests.get(url.strip()).content).replace(b'\n', b'')
-                        data['image_variant'] = image
+                        data['image_variant_1024'] = image
 
-                if len(product.get('integrations')):
+                if len(product.get('integrations', [])):
                     integrations = []
                     list_category = []
                     list_brand = []
@@ -306,7 +308,7 @@ class OmnaSyncProducts(models.TransientModel):
                         integrations.append(integration.get('id'))
                         integration_id = self.env['omna.integration'].search(
                             [('integration_id', '=', integration.get('id'))])
-                        category_or_brands = integration.get('product').get('properties')
+                        category_or_brands = integration.get('variant').get('properties')
 
                         for cat_br in category_or_brands:
                             if (cat_br.get('label') == 'Category') and (cat_br.get('options')):
@@ -343,6 +345,34 @@ class OmnaSyncProducts(models.TransientModel):
 
                 act_product.with_context(synchronizing=True).write(data)
             else:
+                data_variant = product.get('integrations', [])
+                list_variant = []
+                if data_variant:
+                    for field in data_variant[0]['variant']['properties']:
+                        name_attribute = field.get('value')
+
+                        if field.get('id') == "color_family":
+                            name_attribute = '-'.join(name_attribute)
+
+                        product_attribute = self.env['product.attribute'].create({
+                            'name': field.get('label')})
+
+                        product_attribute_value = self.env['product.attribute.value'].create({
+                            'name': name_attribute,
+                            'attribute_id': product_attribute.id})
+
+                        product_template_attribute_line = self.env['product.template.attribute.line'].create({
+                            'product_tmpl_id': act_product_template.id,
+                            'attribute_id': product_attribute.id,
+                            'value_ids': [(4, product_attribute_value.id)],
+                            'product_template_value_ids': [(0, 0, {
+                                'name': field.get('value'),
+                                'product_attribute_value_id': product_attribute_value.id,
+                            })],
+                            # 'value_ids': [(6, 0, 'product_attribute_value')]
+                        })
+                        list_variant += product_template_attribute_line.product_template_value_ids.ids
+
                 data = {
                     'name': act_product_template.name,
                     'description': product.get('description'),
@@ -351,6 +381,7 @@ class OmnaSyncProducts(models.TransientModel):
                     'standard_price': product.get('cost_price'),
                     'omna_variant_id': product.get('id'),
                     'quantity': product.get('quantity'),
+                    'product_template_attribute_value_ids': [(6, 0, list_variant)],
                     'product_tmpl_id': act_product_template.id,
                     'variant_integrations_data': json.dumps(product.get('integrations'), separators=(',', ':'))
                 }
@@ -358,9 +389,9 @@ class OmnaSyncProducts(models.TransientModel):
                     url = product.get('images')[0]
                     if url:
                         image = base64.b64encode(requests.get(url.strip()).content).replace(b'\n', b'')
-                        data['image_variant'] = image
+                        data['image_variant_1024'] = image
 
-                if len(product.get('integrations')):
+                if len(product.get('integrations', [])):
                     integrations = []
                     list_category = []
                     list_brand = []
@@ -370,7 +401,7 @@ class OmnaSyncProducts(models.TransientModel):
                         integration_id = self.env['omna.integration'].search(
                             [('integration_id', '=', integration.get('id'))])
 
-                        category_or_brands = integration.get('product').get('properties')
+                        category_or_brands = integration.get('variant').get('properties')
                         for cat_br in category_or_brands:
                             if (cat_br.get('label') == 'Category') and (cat_br.get('options')):
                                 category_id = cat_br.get('options')[0]['id']
@@ -402,7 +433,7 @@ class OmnaSyncProducts(models.TransientModel):
                     data['brand_ids'] = [(6, 0, list_brand)]
 
                     data['external_id_integration_ids'] = [(0, 0, {'integration_id': integration.get('id'),
-                                                                   'id_external': integration.get('product').get(
+                                                                   'id_external': integration.get('variant').get(
                                                                        'remote_product_id')})]
                     # new_external = self.env['omna.template.integration.external.id'].create(
                     #     {'integration_id': integration.get('id'),
@@ -413,6 +444,8 @@ class OmnaSyncProducts(models.TransientModel):
                     # data['external_id_integration_ids'] = [(6, 0, data_external)]
 
                 act_product = product_obj.with_context(synchronizing=True).create(data)
+                if act_product:
+                    return True
 
     def import_resources(self):
         try:

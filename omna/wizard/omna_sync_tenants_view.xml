@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="view_sync_tenants_wizard" model="ir.ui.view">
             <field name="name">omna.sync.tenants.wizard.form</field>
@@ -29,9 +29,9 @@
         </record>
 
         <menuitem id="menu_omna_sync_tenants" name="Import Tenants"
-                  parent="menu_omna_settings_alt" sequence="0"
+                  parent="menu_omna_settings_alt" sequence="11"
                   action="action_sync_tenants_wizard"/>
 
 
-    </data>
+
 </odoo>

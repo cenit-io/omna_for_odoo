@@ -28,6 +28,9 @@ import hashlib
 from datetime import datetime, timezone, time
 from odoo.tools.translate import _
 from odoo import models, api, exceptions
+import http.client
+import urllib3
+import urllib
 
 _logger = logging.getLogger(__name__)
 
@@ -70,11 +73,16 @@ class OmnaApi(models.AbstractModel):
         config = self.get_config()
         try:
             _logger.info("[POST] %s ? %s", '%s/%s' % (config['omna_api_url'], path), payload)
-            r = requests.post('%s/%s' % (config['omna_api_url'], path), json=payload, headers={'Content-Type': 'application/json'})
+            headers = {'Content-Type': 'application/json; charset=UTF-8', 'Autorization': 'Bearer {}'.format(payload['token']), 'X-OMNA-HMac': payload['hmac'], 'expectSig': payload['hmac']}
+            r = requests.post('%s/%s' % (config['omna_api_url'], path), json=payload, headers=headers)
+            # r = requests.post('%s/%s' % (config['omna_api_url'], path), data=json.dumps(payload), headers={'Content-Type': 'application/json', 'X-OMNA-HMac': payload['hmac']})
+
+
         except Exception as e:
             _logger.error(e)
             raise exceptions.AccessError(_("Error trying to connect to Omna's API."))
         if 200 <= r.status_code < 300:
+        # if 200 <= response.status < 300:
             return r.json()
 
         try:
@@ -164,6 +172,7 @@ class OmnaApi(models.AbstractModel):
             raise exceptions.AccessError(error.get('message', _("Error trying to connect to Omna's API.")))
 
         raise exceptions.ValidationError(error.get('message', _("Omna's API returned with errors")))
+
 
     @api.model
     def _sign_request(self, path, params={}):

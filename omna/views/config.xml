@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="view_omna_settings" model="ir.ui.view">
             <field name="name">Omna settings</field>
@@ -36,8 +36,7 @@
         <menuitem id="menu_omna_hub_settings" parent="menu_omna_settings"
                   sequence="0" action="action_omna_settings"/>
 
-        <menuitem id="menu_omna_settings_alt" name="Settings"
-                  parent="menu_omna_integration" sequence="10"/>
+
 
         <record id="wizard_omna_sign_in_install" model="ir.ui.view">
             <field name="name">Omna sign in</field>
@@ -69,17 +68,18 @@
             <field name="target">new</field>
         </record>
 
-        <menuitem id="menu_omna_settings_hub" name="Settings"
-                  parent="menu_omna_settings_alt" sequence="0"
-                  action="action_omna_settings"/>
 
         <menuitem id="menu_omna_sign_in" name="Sign in with Omna"
-                  parent="menu_omna_settings_alt" sequence="0"
+                  parent="menu_omna_settings_alt" sequence="12"
                   action="action_wizard_omna_sign_in_install"/>
+
+        <menuitem id="menu_omna_settings_hub" name="Settings"
+                  parent="menu_omna_settings_alt" sequence="13"
+                  action="action_omna_settings"/>
 
         <record id="todo_wizard_omna_install" model="ir.actions.todo">
             <field name="action_id" ref="action_wizard_omna_sign_in_install"/>
             <field name="sequence">0</field>
         </record>
-    </data>
+
 </odoo>

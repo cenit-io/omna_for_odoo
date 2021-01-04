@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
         <record id="omna_update_product_in_integration_view" model="ir.ui.view">
             <field name="name">omna.update.product.in.integration.form</field>
             <field name="model">omna.update.product.in.integration</field>
@@ -21,14 +22,25 @@
             </field>
         </record>
 
-        <act_window id="action_update_product_in_integration"
-                    name="Update Product in a Integration"
-                    src_model="product.template"
-                    res_model="omna.update.product.in.integration"
-                    view_type="form"
-                    view_mode="form"
-                    key2="client_action_relate"
-                    target="new"/>
+<!--        <record id="action_update_product_in_integration"-->
+<!--                name="Update Product in a Integration"-->
+<!--                src_model="product.template"-->
+<!--                res_model="omna.update.product.in.integration"-->
+<!--                view_type="form"-->
+<!--                view_mode="form"-->
+<!--                key2="client_action_relate"-->
+<!--                target="new"-->
+<!--                model="ir.actions.act_window"/>-->
 
-    </data>
+
+        <record id="action_update_product_in_integration" model="ir.actions.act_window">
+            <field name="name">Update Product in a Integration</field>
+            <field name="res_model">omna.update.product.in.integration</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="omna_update_product_in_integration_view"/>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="product.model_product_template"/>
+            <field name="binding_view_types">form</field>
+        </record>
+
 </odoo>

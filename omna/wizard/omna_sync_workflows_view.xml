@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="view_sync_workflows_wizard" model="ir.ui.view">
             <field name="name">omna.sync.workflows.wizard.form</field>
@@ -30,9 +30,9 @@
 
 
         <menuitem id="menu_omna_sync_workflows" name="Import Workflows"
-                  parent="menu_omna_settings_alt" sequence="0"
+                  parent="menu_omna_settings_alt" sequence="9"
                   action="action_sync_workflows_wizard"/>
 
 
-    </data>
+
 </odoo>

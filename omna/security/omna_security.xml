@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <odoo>
-    <data>
 
         <record model="ir.module.category" id="module_category_omna">
             <field name="name">Omna</field>
@@ -17,7 +16,5 @@
             <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
-
-    </data>
 
 </odoo>

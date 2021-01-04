@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="omna_webhook_tree_view" model="ir.ui.view">
             <field name="name">omna.webhook.tree</field>
@@ -53,5 +53,5 @@
                   sequence="0"
                   action="action_omna_webhook"/>
 
-    </data>
+
 </odoo>

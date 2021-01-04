@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="view_action_start_workflows_wizard" model="ir.ui.view">
             <field name="name">omna.action_start_workflows_wizard.form</field>
@@ -26,5 +26,5 @@
             <field name="target">new</field>
         </record>
 
-    </data>
+
 </odoo>

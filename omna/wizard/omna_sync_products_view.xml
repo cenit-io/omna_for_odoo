@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+
 
         <record id="view_sync_products_wizard" model="ir.ui.view">
             <field name="name">omna.sync.products.wizard.form</field>
@@ -44,9 +44,9 @@
         </record>
 
         <menuitem id="menu_omna_sync_products" name="Import Products"
-                  parent="menu_omna_settings_alt" sequence="0"
+                  parent="menu_omna_settings_alt" sequence="3"
                   action="action_sync_products_wizard"/>
 
 
-    </data>
+
 </odoo>
