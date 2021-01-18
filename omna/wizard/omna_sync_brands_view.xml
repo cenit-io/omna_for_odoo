@@ -20,6 +20,7 @@
                             <field name="integration_id"/>
                             <field name="brand_id" attrs="{'invisible': [('sync_type', '=', 'by_integration')],
                                    'required': [('sync_type', '!=', 'by_integration')]}"/>
+                            <field name="quantity_max"/>
                         </group>
                     </group>
                     <footer>

@@ -22,6 +22,7 @@ class OmnaSyncBrands(models.TransientModel):
                                  required=True, default='by_integration')
     integration_id = fields.Many2one('omna.integration', 'Integration')
     brand_id = fields.Many2one('product.brand', 'Brand')
+    quantity_max = fields.Integer('Max Quantity', default=100)
 
     def sync_brands(self):
         try:
@@ -34,10 +35,10 @@ class OmnaSyncBrands(models.TransientModel):
                     response = self.get('integrations/%s/brands' % self.integration_id.integration_id, {'limit': limit, 'offset': offset, 'with_details': 'true'})
                     data = response.get('data')
                     brands.extend(data)
-                    if len(data) < limit:
+                    offset += limit
+                    if (len(data) < limit) or (offset == self.quantity_max):
                         requester = False
-                    else:
-                        offset += limit
+
             else:
                 external = self.brand_id.omna_brand_id
                 if external:

@@ -171,7 +171,7 @@
                                 <button name="action_link" icon="fa-link" title="Link" type="object"/>
                                 <button name="action_unlink" icon="fa-chain-broken" title="UnLink" type="object"/>
                                 <button name="launch_wizard_list" icon="fa-search-plus" title="View Properties By Integrations" type="object" />
-
+                                <field name="state" widget="badge" decoration-warning="state == 'unlinked'" decoration-success="state == 'linked'"/>
                             </tree>
                             <!--<field name="variant_external_id_integration_ids" invisible="1"/>-->
                         </field>

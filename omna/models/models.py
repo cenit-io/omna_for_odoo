@@ -422,6 +422,14 @@ class OmnaIntegrationProduct(models.Model):
         return self.env.context.get('default_product_template_id', False)
 
 
+    def _compute_state(self):
+        if self.integration_ids in self.product_template_id.integration_linked_ids:
+            self.state = 'linked'
+        else:
+            self.state = 'unlinked'
+
+
+
     product_template_id = fields.Many2one('product.template', 'Product', required=True, ondelete='cascade', default=lambda self: self.env.context.get('default_product_template_id', False))
     # product_template_id = fields.Many2one('product.template', 'Product', required=True, ondelete='cascade', default=lambda self: self._get_product_template_id())
     # integration_ids = fields.Many2many('omna.integration', 'omna_integration_integration_rel', 'integration_product_id',
@@ -434,6 +442,9 @@ class OmnaIntegrationProduct(models.Model):
         ('ALL', 'ALL')], default='ALL', required=True)
     delete_from_integration = fields.Boolean("Delete from Integration", default=False,
                                              help="Set whether the product should be removed from the remote integration source.")
+    state = fields.Selection([('linked', 'LINKED'), ('unlinked', 'UNLINKED')], default='unlinked', compute='_compute_state')
+
+
 
     @api.model
     def create(self, vals_list):
@@ -514,13 +525,13 @@ class OmnaIntegrationProduct(models.Model):
 
             # external_id_integration_ids
 
-            new_external = self.env['omna.template.integration.external.id'].create(
-                {'integration_id': self.integration_ids.integration_id,
-                 'id_external': self.product_template_id.omna_product_id})
-            self.env.cr.commit()
-            # vals_list['external_id_integration_ids'] = [(6, 0, data_external)]
-            self.product_template_id.write({'external_id_integration_ids': [(4, new_external.id)]})
+            # new_external = self.env['omna.template.integration.external.id'].create(
+            #     {'integration_id': self.integration_ids.integration_id,
+            #      'id_external': self.product_template_id.omna_product_id})
             # self.env.cr.commit()
+            # vals_list['external_id_integration_ids'] = [(6, 0, data_external)]
+            self.product_template_id.write({'integration_linked_ids': [(4, self.integration_ids.id)]})
+            self.env.cr.commit()
 
             return self
         except Exception:
@@ -542,10 +553,10 @@ class OmnaIntegrationProduct(models.Model):
 
             response = self.patch('products/%s' % self.product_template_id.omna_product_id, data)
 
-            aux = temp_obj.search([('integration_id', '=', self.integration_ids.integration_id), ('product_template_id', '=', self.product_template_id.omna_product_id)])
+            # aux = temp_obj.search([('integration_id', '=', self.integration_ids.integration_id), ('product_template_id', '=', self.product_template_id.omna_product_id)])
 
             self.product_template_id.write({'integration_ids': [(2, self.id)],
-                                            'external_id_integration_ids': [(2, aux.id)]})
+                                            'integration_linked_ids': [(3, self.integration_ids.id)]})
             self.env.cr.commit()
 
             return self
@@ -588,12 +599,12 @@ class ProductTemplate(models.Model):
     omna_tenant_id = fields.Many2one('omna.tenant', 'Tenant', default=_current_tenant)
     # omna_product_id = fields.Many2one('omna.integration', 'Integration ID')
     omna_product_id = fields.Char("Product identifier in OMNA", index=True)
-    # integration_ids = fields.Many2many('omna.integration', 'omna_integration_product', string='Integrations')
     integration_ids = fields.One2many('omna.integration_product', 'product_template_id', 'Integrations')
     integrations_data = fields.Char('Integrations data')
     no_create_variants = fields.Boolean('Do not create variants automatically', default=True)
     external_id_integration_ids = fields.One2many('omna.template.integration.external.id', 'product_template_id',
                                                   string='External Id by Integration')
+    integration_linked_ids = fields.Many2many('omna.integration', 'omna_integration_product_template_rel', string='Linked Integrations')
     # variant_external_id_integration_ids = fields.One2many('omna.variant.integration.external.id', 'product_variant_id',
     #                                               string='External Id by Integration')
 
@@ -680,6 +691,8 @@ class ProductTemplate(models.Model):
         if not self._context.get('synchronizing'):
             for record in self:
                 if 'name' in vals or 'list_price' in vals or 'description' in vals:
+                    if "create_product_product" in self._context:
+                        vals['name'] = record.name
                     data = {
                         'name': vals['name'] if 'name' in vals else record.name,
                         'price': vals['list_price'] if 'list_price' in vals else record.list_price,
@@ -757,7 +770,7 @@ class ProductTemplate(models.Model):
         self.check_access_rights('unlink')
         self.check_access_rule('unlink')
         for rec in self:
-            integrations = [integration.integration_id for integration in rec.integration_ids]
+            integrations = [integration.integration_ids.integration_id for integration in rec.integration_ids]
             data = {
                 "integration_ids": integrations,
                 "delete_from_integration": True,
@@ -927,7 +940,8 @@ class ProductProduct(models.Model):
         self.check_access_rights('unlink')
         self.check_access_rule('unlink')
         for rec in self:
-            integrations = [integration.integration_id for integration in rec.integration_ids]
+            integrations = [integration.integration_ids.integration_id for integration in rec.integration_ids]
+            # integrations = [integration.integration_id for integration in rec.variant_integration_ids]
             data = {
                 "integration_ids": integrations,
                 "delete_from_integration": True,
@@ -965,7 +979,7 @@ class ProductProduct(models.Model):
         context = dict(
             self.env.context,
             # integration_id=self.integration_ids.id,
-            # integration_product_id=self.id,
+            default_product_product_id=self.id,
         )
 
         return {

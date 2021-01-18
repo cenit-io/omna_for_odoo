@@ -133,6 +133,7 @@ class OmnaSyncProducts(models.TransientModel):
                         data['brand_ids'] = [(6, 0, list_brand)]
 
                         omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
+                        data['integration_linked_ids'] = [(6, 0, omna_integration.ids)]
                         for integration in omna_integration:
                             # data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
                             data['integration_ids'] = [(0, 0, {'integration_ids': integration.id})]
@@ -176,6 +177,7 @@ class OmnaSyncProducts(models.TransientModel):
                         data['brand_ids'] = [(6, 0, list_brand)]
 
                         omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
+                        data['integration_linked_ids'] = [(6, 0, omna_integration.ids)]
                         for integration in omna_integration:
                             # revisar aca porque me esta repitiendo la integracion, cuando no deberia ser
                             # data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
@@ -245,6 +247,7 @@ class OmnaSyncProducts(models.TransientModel):
                     data['brand_ids'] = [(6, 0, list_brand)]
 
                     omna_integration = self.env['omna.integration'].search([('integration_id', 'in', integrations)])
+                    data['integration_linked_ids'] = [(6, 0, omna_integration.ids)]
                     for integration in omna_integration:
                         # data['integration_ids'] = [(0, 0, {'integration_ids': [(4, integration.id, 0)]})]
                         data['integration_ids'] = [(0, 0, {'integration_ids': integration.id})]
